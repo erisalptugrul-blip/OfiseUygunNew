@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 110" width="240" height="110">
+  <rect width="240" height="110" rx="10" fill="#fff"/>
+  <!-- Blue underline accent -->
+  <rect x="20" y="78" width="200" height="4" rx="2" fill="#0067C5"/>
+  <!-- Esselte text -->
+  <text x="120" y="72" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="700" fill="#0067C5" text-anchor="middle" letter-spacing="-1">Esselte</text>
+  <!-- Dot accent -->
+  <circle cx="214" cy="40" r="6" fill="#0067C5"/>
+</svg>
