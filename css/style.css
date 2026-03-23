@@ -85,7 +85,7 @@ img{display:block;max-width:100%;object-fit:contain}
 .cbi svg{width:14px;height:14px;flex-shrink:0}
 
 /* ── PAGE ── */
-.page{padding:18px 0 56px}
+.page{padding:40px 0 56px}
 
 /* ── HERO ── */
 .hero-section{margin-bottom:20px}
