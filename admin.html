@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OfiseUygun – Admin Paneli</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11;
+    --surface: #16181c;
+    --surface2: #1e2128;
+    --border: #2a2d35;
+    --border2: #363b46;
+    --green: #22c55e;
+    --green-dim: #16a34a;
+    --green-glow: rgba(34,197,94,.12);
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --blue: #3b82f6;
+    --text: #f1f5f9;
+    --muted: #64748b;
+    --muted2: #94a3b8;
+    --mono: 'IBM Plex Mono', monospace;
+    --head: 'Syne', sans-serif;
+    --body: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--text); font-family: var(--body); font-size: 14px; min-height: 100vh; display: flex; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 220px; flex-shrink: 0; background: var(--surface);
+    border-right: 1px solid var(--border); display: flex; flex-direction: column;
+    position: sticky; top: 0; height: 100vh; overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 24px 20px 20px; border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo .brand { font-family: var(--head); font-size: 18px; font-weight: 800; }
+  .sidebar-logo .brand span { color: var(--green); }
+  .sidebar-logo .sub { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 3px; letter-spacing: .05em; }
+  .nav-section { padding: 16px 12px 8px; }
+  .nav-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; padding: 0 8px; margin-bottom: 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 8px;
+    cursor: pointer; font-size: 13px; font-weight: 500; color: var(--muted2);
+    transition: all .15s; margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--green-glow); color: var(--green); border: 1px solid rgba(34,197,94,.2); }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--border); }
+  .site-link {
+    display: flex; align-items: center; gap: 8px; padding: 9px 10px; border-radius: 8px;
+    background: var(--green-glow); border: 1px solid rgba(34,197,94,.2); color: var(--green);
+    font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all .15s;
+  }
+  .site-link:hover { background: rgba(34,197,94,.2); }
+
+  /* ── MAIN ── */
+  .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .topbar {
+    background: var(--surface); border-bottom: 1px solid var(--border);
+    padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-title { font-family: var(--head); font-size: 16px; font-weight: 700; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .badge-green { background: var(--green-glow); border: 1px solid rgba(34,197,94,.25); color: var(--green); font-family: var(--mono); font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+  .content { padding: 28px; flex: 1; }
+
+  /* ── PAGES ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* ── STATS ROW ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 20px; position: relative; overflow: hidden;
+  }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--green); opacity: .6; }
+  .stat-label { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; }
+  .stat-val { font-family: var(--head); font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; }
+  .stat-sub { font-size: 12px; color: var(--muted); margin-top: 5px; }
+
+  /* ── TOOLBAR ── */
+  .toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+  .search-box {
+    flex: 1; min-width: 220px; display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0 12px; height: 38px;
+  }
+  .search-box svg { width: 15px; height: 15px; color: var(--muted); flex-shrink: 0; }
+  .search-box input { flex: 1; background: none; border: none; outline: none; color: var(--text); font-size: 13px; font-family: var(--body); }
+  .search-box input::placeholder { color: var(--muted); }
+  .sel {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 0 12px; height: 38px; color: var(--text); font-size: 13px; font-family: var(--body);
+    outline: none; cursor: pointer;
+  }
+  .btn {
+    height: 38px; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 7px; white-space: nowrap;
+    font-family: var(--body);
+  }
+  .btn-primary { background: var(--green); color: #000; border: none; }
+  .btn-primary:hover { background: #16a34a; }
+  .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--muted2); }
+  .btn-outline:hover { border-color: var(--green); color: var(--green); }
+  .btn-danger { background: transparent; border: 1px solid rgba(239,68,68,.3); color: var(--red); }
+  .btn-danger:hover { background: rgba(239,68,68,.1); }
+  .btn svg { width: 14px; height: 14px; }
+
+  /* ── TABLE ── */
+  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: var(--surface2); padding: 10px 16px; text-align: left; font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; font-weight: 400; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 11px 16px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.02); }
+  .td-img { width: 42px; height: 42px; object-fit: contain; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); }
+  .td-img-ph { width: 42px; height: 42px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--muted); }
+  .td-name { font-weight: 600; color: var(--text); max-width: 220px; }
+  .td-name small { display: block; font-weight: 400; color: var(--muted); font-size: 11px; margin-top: 2px; }
+  .td-price { font-family: var(--mono); font-weight: 600; color: var(--green); }
+  .td-sku { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .cat-badge { display: inline-flex; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--surface2); border: 1px solid var(--border2); color: var(--muted2); white-space: nowrap; }
+  .ribbon-badge { display: inline-flex; padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3); color: var(--yellow); }
+  .row-actions { display: flex; gap: 6px; }
+  .act-btn { width: 30px; height: 30px; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .15s; }
+  .act-btn svg { width: 14px; height: 14px; }
+  .act-edit { background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.2); color: var(--blue); }
+  .act-edit:hover { background: rgba(59,130,246,.2); }
+  .act-del { background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.15); color: var(--red); }
+  .act-del:hover { background: rgba(239,68,68,.18); }
+
+  /* ── PAGINATION ── */
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-top: 1px solid var(--border); }
+  .pag-info { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+  .pag-btns { display: flex; gap: 5px; }
+  .pag-btn { width: 30px; height: 30px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted2); font-size: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .15s; }
+  .pag-btn:hover { border-color: var(--green); color: var(--green); }
+  .pag-btn.active { background: var(--green); color: #000; border-color: var(--green); font-weight: 700; }
+
+  /* ── MODAL ── */
+  .modal-ov { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .modal-ov.open { opacity: 1; pointer-events: all; }
+  .modal-box {
+    background: var(--surface); border: 1px solid var(--border2); border-radius: 16px;
+    width: 560px; max-width: 95vw; max-height: 90vh; overflow-y: auto;
+    transform: translateY(16px); transition: transform .2s;
+  }
+  .modal-ov.open .modal-box { transform: translateY(0); }
+  .modal-head { padding: 22px 24px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .modal-head h3 { font-family: var(--head); font-size: 16px; font-weight: 700; }
+  .modal-x { width: 30px; height: 30px; border-radius: 6px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted2); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .15s; }
+  .modal-x:hover { border-color: var(--red); color: var(--red); }
+  .modal-x svg { width: 14px; height: 14px; }
+  .modal-body { padding: 22px 24px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-full { grid-column: 1/-1; }
+  .field label { display: block; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 6px; }
+  .field input, .field select, .field textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px;
+    padding: 9px 12px; color: var(--text); font-size: 13px; font-family: var(--body); outline: none;
+    transition: border-color .15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--green); }
+  .field textarea { resize: vertical; min-height: 80px; }
+  .modal-foot { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px;
+    padding: 12px 18px; display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 500; box-shadow: 0 8px 30px rgba(0,0,0,.4);
+    transform: translateY(80px); opacity: 0; transition: all .3s; pointer-events: none;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .toast-dot.red { background: var(--red); }
+
+  /* ── EMPTY ── */
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state svg { width: 48px; height: 48px; margin: 0 auto 14px; opacity: .3; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── CONFIRM MODAL ── */
+  .confirm-box { max-width: 380px; }
+  .confirm-icon { width: 48px; height: 48px; border-radius: 12px; background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.2); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+  .confirm-icon svg { width: 22px; height: 22px; color: var(--red); }
+  .confirm-text { text-align: center; margin-bottom: 20px; }
+  .confirm-text h4 { font-family: var(--head); font-size: 16px; margin-bottom: 6px; }
+  .confirm-text p { font-size: 13px; color: var(--muted2); line-height: 1.5; }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* ── CATEGORY COLORS ── */
+  .cat-toner { background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.2); color: #f87171; }
+  .cat-yazici { background: rgba(59,130,246,.08); border-color: rgba(59,130,246,.2); color: #60a5fa; }
+  .cat-kirtasiye { background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.2); color: #fbbf24; }
+  .cat-ambalaj { background: rgba(139,92,246,.08); border-color: rgba(139,92,246,.2); color: #a78bfa; }
+  .cat-elektronik { background: rgba(34,197,94,.08); border-color: rgba(34,197,94,.2); color: #4ade80; }
+  .cat-termal { background: rgba(236,72,153,.08); border-color: rgba(236,72,153,.2); color: #f472b6; }
+  .cat-temizlik { background: rgba(20,184,166,.08); border-color: rgba(20,184,166,.2); color: #2dd4bf; }
+
+  /* ── IMG PREVIEW ── */
+  .img-preview { width: 80px; height: 80px; border-radius: 8px; border: 1px solid var(--border2); object-fit: contain; background: var(--surface2); display: none; margin-bottom: 10px; }
+  .img-preview.show { display: block; }
+
+  /* ── BULK BAR ── */
+  .bulk-bar {
+    background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px;
+    padding: 10px 16px; display: flex; align-items: center; gap: 12px;
+    margin-bottom: 14px; display: none;
+  }
+  .bulk-bar.show { display: flex; }
+  .bulk-count { font-family: var(--mono); font-size: 12px; color: var(--green); font-weight: 600; }
+
+  .chk { width: 15px; height: 15px; accent-color: var(--green); cursor: pointer; }
+
+  /* ── EXPORT BTN ── */
+  .export-note { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 10px; padding: 10px 12px; background: var(--surface2); border-radius: 6px; border: 1px solid var(--border); line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">Ofise<span>Uygun</span></div>
+    <div class="sub">// admin panel</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Genel</div>
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('products')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+      Ürünler
+    </div>
+    <div class="nav-item" onclick="showPage('addProduct')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+      Ürün Ekle
+    </div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Araçlar</div>
+    <div class="nav-item" onclick="showPage('export')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      Dışa Aktar
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <a class="site-link" href="index.html" target="_blank">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+      Siteyi Görüntüle
+    </a>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    <div class="topbar-right">
+      <div class="badge-green" id="productCountBadge">0 ürün</div>
+    </div>
+  </div>
+  <div class="content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Toplam Ürün</div>
+          <div class="stat-val" id="s-total">0</div>
+          <div class="stat-sub">Aktif stok</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Kategori</div>
+          <div class="stat-val" id="s-cats">0</div>
+          <div class="stat-sub">Farklı kategori</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Marka</div>
+          <div class="stat-val" id="s-brands">0</div>
+          <div class="stat-sub">Farklı marka</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Fırsatlar</div>
+          <div class="stat-val" id="s-sale">0</div>
+          <div class="stat-sub">İndirimli ürün</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="table-wrap">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Kategori Dağılımı</div>
+          <div id="catBreakdown" style="padding:8px 0"></div>
+        </div>
+        <div class="table-wrap">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Hızlı İşlemler</div>
+          <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+            <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="showPage('addProduct')">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+              Yeni Ürün Ekle
+            </button>
+            <button class="btn btn-outline" style="width:100%;justify-content:center" onclick="showPage('products')">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+              Ürünleri Listele
+            </button>
+            <button class="btn btn-outline" style="width:100%;justify-content:center" onclick="showPage('export')">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              app.js İndir
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ÜRÜNLER ── -->
+    <div class="page" id="page-products">
+      <div class="toolbar">
+        <div class="search-box">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="search" id="prodSearch" placeholder="Ürün adı, marka, SKU ara..." oninput="renderProducts()">
+        </div>
+        <select class="sel" id="catFilter" onchange="renderProducts()">
+          <option value="">Tüm Kategoriler</option>
+        </select>
+        <select class="sel" id="sortFilter" onchange="renderProducts()">
+          <option value="">Varsayılan</option>
+          <option value="pa">Fiyat ↑</option>
+          <option value="pd">Fiyat ↓</option>
+          <option value="na">A–Z</option>
+        </select>
+        <button class="btn btn-primary" onclick="openAddModal()">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7h14"/></svg>
+          Ürün Ekle
+        </button>
+      </div>
+
+      <div class="bulk-bar" id="bulkBar">
+        <span class="bulk-count" id="bulkCount">0 seçili</span>
+        <button class="btn btn-danger" onclick="bulkDelete()">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          Seçilenleri Sil
+        </button>
+        <button class="btn btn-outline" onclick="clearSelection()">İptal</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th><input type="checkbox" class="chk" id="selectAll" onchange="toggleSelectAll(this)"></th>
+              <th>Görsel</th>
+              <th>Ürün Adı</th>
+              <th>Kategori</th>
+              <th>Fiyat</th>
+              <th>SKU</th>
+              <th>İşlemler</th>
+            </tr>
+          </thead>
+          <tbody id="prodTbody"></tbody>
+        </table>
+        <div class="pagination">
+          <div class="pag-info" id="pagInfo"></div>
+          <div class="pag-btns" id="pagBtns"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ÜRÜN EKLE ── -->
+    <div class="page" id="page-addProduct">
+      <div style="max-width:600px">
+        <div class="table-wrap" style="padding:24px">
+          <h3 style="font-family:var(--head);font-size:16px;margin-bottom:20px">Yeni Ürün Ekle</h3>
+          <div class="form-grid">
+            <div class="field form-full">
+              <label>Ürün Adı *</label>
+              <input type="text" id="f-name" placeholder="Ürün adını girin">
+            </div>
+            <div class="field">
+              <label>Marka</label>
+              <input type="text" id="f-brand" placeholder="Marka adı">
+            </div>
+            <div class="field">
+              <label>SKU / Kod</label>
+              <input type="text" id="f-sku" placeholder="Ürün kodu">
+            </div>
+            <div class="field">
+              <label>Fiyat (₺) *</label>
+              <input type="number" id="f-price" placeholder="0.00" step="0.01">
+            </div>
+            <div class="field">
+              <label>Eski Fiyat (₺)</label>
+              <input type="number" id="f-strikePrice" placeholder="0.00" step="0.01">
+            </div>
+            <div class="field form-full">
+              <label>Kategori *</label>
+              <select id="f-category">
+                <option value="">Kategori seçin</option>
+                <option>Toner & Kartuş</option>
+                <option>Yazıcı & Fotokopi</option>
+                <option>Ofis ve Kırtasiye</option>
+                <option>Ambalaj Malzemeleri</option>
+                <option>Elektronik</option>
+                <option>Termal & POS Rulo</option>
+                <option>Temizlik & Hijyen</option>
+                <option>Defter & Ajanda</option>
+              </select>
+            </div>
+            <div class="field form-full">
+              <label>Rozet</label>
+              <select id="f-ribbon">
+                <option value="">Rozet yok</option>
+                <option value="En Çok Satan">⭐ En Çok Satan</option>
+                <option value="Yeni">🆕 Yeni</option>
+                <option value="İndirimli">🔥 İndirimli</option>
+              </select>
+            </div>
+            <div class="field form-full">
+              <label>Görsel URL</label>
+              <input type="url" id="f-img" placeholder="https://..." oninput="previewImg()">
+              <img id="f-img-preview" class="img-preview" alt="">
+            </div>
+            <div class="field form-full">
+              <label>Açıklama</label>
+              <textarea id="f-desc" placeholder="Ürün açıklaması..."></textarea>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:20px">
+            <button class="btn btn-primary" onclick="saveNewProduct()">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+              Ürünü Kaydet
+            </button>
+            <button class="btn btn-outline" onclick="clearForm()">Temizle</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DIŞA AKTAR ── -->
+    <div class="page" id="page-export">
+      <div style="max-width:600px;display:flex;flex-direction:column;gap:16px">
+        <div class="table-wrap" style="padding:24px">
+          <h3 style="font-family:var(--head);font-size:16px;margin-bottom:6px">app.js Olarak İndir</h3>
+          <p style="font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:18px">
+            Admin panelinde yaptığınız tüm değişiklikler (ürün ekleme, silme, düzenleme) buradan <code style="background:var(--surface2);padding:2px 6px;border-radius:4px;font-family:var(--mono);font-size:12px">app.js</code> dosyası olarak indirilir. İndirilen dosyayı sitenizin klasörüne kopyalayın.
+          </p>
+          <button class="btn btn-primary" style="width:100%;justify-content:center;height:44px" onclick="exportAppJS()">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            app.js İndir
+          </button>
+          <div class="export-note" style="margin-top:14px">
+            📁 İndirilen dosyayı <strong>index.html</strong> ile aynı klasöre kopyalayın.<br>
+            ✅ Eski <strong>app.js</strong> dosyasının üzerine yazın.<br>
+            🔄 Sayfayı yenileyin — değişiklikler anında yansır.
+          </div>
+        </div>
+
+        <div class="table-wrap" style="padding:24px">
+          <h3 style="font-family:var(--head);font-size:16px;margin-bottom:6px">JSON Olarak İndir</h3>
+          <p style="font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:18px">
+            Sadece ürün verilerini JSON formatında indirin. Yedekleme veya başka platformlara aktarma için kullanışlıdır.
+          </p>
+          <button class="btn btn-outline" style="width:100%;justify-content:center;height:44px" onclick="exportJSON()">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            products.json İndir
+          </button>
+        </div>
+
+        <div class="table-wrap" style="padding:24px">
+          <h3 style="font-family:var(--head);font-size:16px;margin-bottom:6px">JSON İçe Aktar</h3>
+          <p style="font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:14px">
+            Daha önce indirdiğiniz JSON dosyasını yükleyerek verileri geri yükleyin.
+          </p>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(this)">
+          <button class="btn btn-outline" style="width:100%;justify-content:center;height:44px" onclick="document.getElementById('importFile').click()">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            JSON Dosyası Yükle
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ ÜRÜN DÜZENLE MODAL ══ -->
+<div class="modal-ov" id="editModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h3>Ürünü Düzenle</h3>
+      <div class="modal-x" onclick="closeModal('editModal')"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M6 18L18 6M6 6l12 12"/></svg></div>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="e-idx">
+      <div class="form-grid">
+        <div class="field form-full">
+          <label>Ürün Adı *</label>
+          <input type="text" id="e-name">
+        </div>
+        <div class="field">
+          <label>Marka</label>
+          <input type="text" id="e-brand">
+        </div>
+        <div class="field">
+          <label>SKU / Kod</label>
+          <input type="text" id="e-sku">
+        </div>
+        <div class="field">
+          <label>Fiyat (₺) *</label>
+          <input type="number" id="e-price" step="0.01">
+        </div>
+        <div class="field">
+          <label>Eski Fiyat (₺)</label>
+          <input type="number" id="e-strikePrice" step="0.01">
+        </div>
+        <div class="field form-full">
+          <label>Kategori</label>
+          <select id="e-category">
+            <option>Toner & Kartuş</option>
+            <option>Yazıcı & Fotokopi</option>
+            <option>Ofis ve Kırtasiye</option>
+            <option>Ambalaj Malzemeleri</option>
+            <option>Elektronik</option>
+            <option>Termal & POS Rulo</option>
+            <option>Temizlik & Hijyen</option>
+            <option>Defter & Ajanda</option>
+          </select>
+        </div>
+        <div class="field form-full">
+          <label>Rozet</label>
+          <select id="e-ribbon">
+            <option value="">Rozet yok</option>
+            <option value="En Çok Satan">⭐ En Çok Satan</option>
+            <option value="Yeni">🆕 Yeni</option>
+            <option value="İndirimli">🔥 İndirimli</option>
+          </select>
+        </div>
+        <div class="field form-full">
+          <label>Görsel URL</label>
+          <input type="url" id="e-img" oninput="previewEditImg()">
+          <img id="e-img-preview" class="img-preview" alt="">
+        </div>
+        <div class="field form-full">
+          <label>Açıklama</label>
+          <textarea id="e-desc"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('editModal')">İptal</button>
+      <button class="btn btn-primary" onclick="saveEdit()">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M5 13l4 4L19 7"/></svg>
+        Kaydet
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SİL ONAYI ══ -->
+<div class="modal-ov" id="deleteModal">
+  <div class="modal-box confirm-box">
+    <div class="modal-body" style="padding:28px 24px">
+      <div class="confirm-icon">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+      </div>
+      <div class="confirm-text">
+        <h4>Ürünü Sil</h4>
+        <p id="deleteMsg">Bu ürünü silmek istediğinize emin misiniz? Bu işlem geri alınamaz.</p>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeModal('deleteModal')">İptal</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        Evet, Sil
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast">
+  <div class="toast-dot" id="toastDot"></div>
+  <span id="toastMsg"></span>
+</div>
+
+<script>
+// ══ VERİ YÜKLEME ══
+// Versiyon kontrolü — her yeni admin.html'de localStorage sıfırlanır
+const DATA_VERSION = '262'; // ürün sayısı değişince bu artar
+const DEFAULT_PRODUCTS = [{"name": "Kyocera TK-3060 İTHAL TONER", "brand": "Kyocera", "price": 700.0, "strikePrice": 0.0, "sku": "toner1", "category": "Toner & Kartuş", "ribbon": "", "description": "1.Kalite İthal Tonerdir.", "img": "https://static.wixstatic.com/media/899f39_bf5e02796f1c45749b824a8dabb32b79~mv2.png"}, {"name": "Canon i-SENSYS MF453dw Fotokopi Makinası", "brand": "Canon", "price": 18750.0, "strikePrice": 0.0, "sku": "yazıcı1", "category": "Yazıcı & Fotokopi", "ribbon": "En Çok Satan", "description": "Canon i-SENSYS MF453dw Fotokopi Makinası, güvenilir ve yüksek performanslı bir ofis makinesidir.  Yüksek hızlı çift taraflı baskı özelliğiyle, belgelerinizi hızlı ve verimli bir şekilde çoğaltabilirsi", "img": "https://static.wixstatic.com/media/899f39_6cd233990ed3423eada49bb7715b6a61~mv2.png"}, {"name": "Canon i-SENSYS MF463dw Fotokopi Makinası", "brand": "Canon", "price": 19450.0, "strikePrice": 0.0, "sku": "yazıcı2", "category": "Yazıcı & Fotokopi", "ribbon": "En Çok Satan", "description": "Canon i-SENSYS MF463dw Fotokopi Makinası, size güvenilir ve hızlı ofis baskı, tarama ve fotokopi çözümleri sunar. Bu çok yönlü makine, 38 ppm hızında baskı yapabilir ve çift taraflı baskı özelliği say", "img": "https://static.wixstatic.com/media/899f39_b5d13fe6eb88433288a2e6f785a3bb8a~mv2.png"}, {"name": "Canon i-SENSYS MF655cdw Renkli Fotokopi Makinası ", "brand": "Canon", "price": 19950.0, "strikePrice": 0.0, "sku": "yazıcı3", "category": "Yazıcı & Fotokopi", "ribbon": "En Çok Satan", "description": "Canon i-SENSYS MF655cdw Renkli Fotokopi Makinası, ofisinizdeki baskı ve kopyalama işlemlerini hızlı ve verimli bir şekilde gerçekleştirmenizi sağlayacak bir üründür. Bu çok yönlü fotokopi makinesi, re", "img": "https://static.wixstatic.com/media/899f39_03add774d2c84b5e83991a0a62aed7fc~mv2.png"}, {"name": "Canon PIXMA G3416 Yazıcı", "brand": "Canon", "price": 6950.0, "strikePrice": 0.0, "sku": "yazıcı4", "category": "Yazıcı & Fotokopi", "ribbon": "En Çok Satan", "description": "Canon PIXMA G3416 Yazıcı, dayanıklı ve yüksek performanslı bir yazıcıdır. Bu yazıcı, dolum tankı sistemine sahip olup, büyük miktarda belge ve fotoğraf basımı için idealdir.  Tükenen mürekkep kolayca ", "img": "https://static.wixstatic.com/media/899f39_06ead777cce24d429261ed97655d2b45~mv2.png"}, {"name": "Epson L3250 Yazıcı", "brand": "Epson", "price": 7950.0, "strikePrice": 0.0, "sku": "yazıcı5", "category": "Yazıcı & Fotokopi", "ribbon": "En Çok Satan", "description": "Epson L3250 Yazıcı, bürolar için mükemmel bir seçenektir. Yüksek kaliteli baskılar için tasarlanan bu yazıcı, kullanıcıların ihtiyaç duyduğu profesyonel sonuçları en üst düzeyde sunar. Hızlı baskı hız", "img": "https://static.wixstatic.com/media/899f39_1141b5de1e6647399274ea5b0ec4ae50~mv2.png"}, {"name": "Kyocera TK-1130 İTHAL TONER", "brand": "Kyocera", "price": 425.0, "strikePrice": 0.0, "sku": "toner2", "category": "Toner & Kartuş", "ribbon": "", "description": "", "img": "https://static.wixstatic.com/media/899f39_2f05a939c94d4029951e016eeb8ef9c2~mv2.png"}, {"name": "Kyocera TK-1120 İTHAL TONER", "brand": "Kyocera", "price": 290.0, "strikePrice": 0.0, "sku": "toner3", "category": "Toner & Kartuş", "ribbon": "", "description": "", "img": "https://static.wixstatic.com/media/899f39_abae5fb3cf064d1c98905d4ead80239e~mv2.png"}, {"name": "Kyocera TK-475 İTHAL TONER", "brand": "Kyocera", "price": 575.0, "strikePrice": 0.0, "sku": "toner5", "category": "Toner & Kartuş", "ribbon": "", "description": "", "img": "https://static.wixstatic.com/media/899f39_ed9ef5c11685419cb857f3a7886dcc1c~mv2.png"}, {"name": "Kyocera TK-3100 İTHAL TONER", "brand": "Kyocera", "price": 475.0, "strikePrice": 0.0, "sku": "toner6", "category": "Toner & Kartuş", "ribbon": "", "description": "", "img": "https://static.wixstatic.com/media/899f39_3af0d5aae898476fb9e8a8d05f686cd5~mv2.png"}, {"name": "Kyocera TK-3160 İTHAL TONER", "brand": "Kyocera", "price": 420.0, "strikePrice": 0.0, "sku": "toner7", "category": "Toner & Kartuş", "ribbon": "", "description": "", "img": "https://static.wixstatic.com/media/899f39_8af04d6c63b247a78b9720f2e8b90ba8~mv2.png"}, {"name": "Kyocera TK-1150 İTHAL TONER", "brand": "Kyocera", "price": 250.0, "strikePrice": 0.0, "sku": "toner7_2", "category": "Toner & Kartuş", "ribbon": "", "description": "", "img": "https://static.wixstatic.com/media/899f39_ac42ab302f404f14b628300bb83dbff9~mv2.png"}, {"name": "Kyocera TK-3190 İTHAL TONER", "brand": "Kyocera", "price": 990.0, "strikePrice": 0.0, "sku": "toner8", "category": "Toner & Kartuş", "ribbon": "", "description": "", "img": "https://static.wixstatic.com/media/899f39_96a47532456d494e8545f59b3b204f39~mv2.png"}, {"name": "Kyocera TK-3300 İTHAL TONER", "brand": "Kyocera", "price": 520.0, "strikePrice": 0.0, "sku": "toner8_2", "category": "Toner & Kartuş", "ribbon": "", "description": "", "img": "https://static.wixstatic.com/media/899f39_a8ca268ba85b4d1b839972d0b74bc50e~mv2.png"}, {"name": "Kyocera TK-3400 İTHAL TONER", "brand": "Kyocera", "price": 500.0, "strikePrice": 0.0, "sku": "toner9", "category": "Toner & Kartuş", "ribbon": "", "description": "", "img": "https://static.wixstatic.com/media/899f39_b0ce10b5a03c41adba0f864d39a601cf~mv2.png"}, {"name": "HP CE285A,CB435A,CB436A & CANON CRG-712,713,725 (1.6K) İTHAL TONER", "brand": "Canon", "price": 280.0, "strikePrice": 0.0, "sku": "toner9_2", "category": "Toner & Kartuş", "ribbon": "", "description": "CE285A,CB435A,CB436A & CANON CRG-712,713,725 uyumludur.", "img": "https://static.wixstatic.com/media/899f39_a058575bc5bf4e76ad1b6d6eabae0634~mv2.jpg"}, {"name": "HP CE278A & CRG-726, CRG-728 (2.1K) İTHAL TONER", "brand": "HP", "price": 280.0, "strikePrice": 0.0, "sku": "toner10", "category": "Toner & Kartuş", "ribbon": "", "description": "CE278A & CRG-726, CRG-728 uyumludur.", "img": "https://static.wixstatic.com/media/899f39_1ebf562f489c40a3a17c233835a5e45d~mv2.jpg"}, {"name": "HP Q2612A (12A) & CANON CRG-703 (2K) İTHAL TONER", "brand": "HP", "price": 275.0, "strikePrice": 0.0, "sku": "toner11", "category": "Toner & Kartuş", "ribbon": "", "description": "HP Q2612A (12A) & CANON CRG-703 UYUMLUDUR.", "img": "https://static.wixstatic.com/media/899f39_5c0ffa182c0b40ab903ad7afbe171d49~mv2.jpg"}, {"name": "HP CF283A & CANON CRG 737 (1.5K) İTHAL TONER", "brand": "HP", "price": 300.0, "strikePrice": 0.0, "sku": "toner12", "category": "Toner & Kartuş", "ribbon": "", "description": "HP CF283A & CANON CRG 737 uyumludur.1.5k baskı kapasitesi vardır.", "img": "https://static.wixstatic.com/media/899f39_126f8fb1b0f2464bb91e9318cfb7c86d~mv2.jpg"}, {"name": "HP CF283X (83X) & CANON CRG737 (2.4K) İTHAL TONER", "brand": "HP", "price": 325.0, "strikePrice": 0.0, "sku": "toner13", "category": "Toner & Kartuş", "ribbon": "", "description": "HP CF283X (83X) & CANON CRG737 UYUMLUDUR.2.4K BASKI KAPASİTESİ MEVCUTTUR.", "img": "https://static.wixstatic.com/media/899f39_4d771857eb0d4d9686dd4ace7eb7d82a~mv2.jpg"}, {"name": "HP CE255X (55X) & CANON CRG-724H (12.5K) İTHAL TONER", "brand": "HP", "price": 875.0, "strikePrice": 0.0, "sku": "toner14", "category": "Toner & Kartuş", "ribbon": "", "description": "HP CE255X (55X) & CANON CRG-724H UYUMLUDUR.12.5K BASKI KAPASİTESİNE SAHİPTİR.", "img": "https://static.wixstatic.com/media/899f39_e70775ec2ba24dc0bd202dd0aefdb50d~mv2.jpg"}, {"name": "HP CF289Y & CANON T06 & CRG-056H Chipsiz (20K) İTHAL TONER", "brand": "HP", "price": 975.0, "strikePrice": 0.0, "sku": "toner15", "category": "Toner & Kartuş", "ribbon": "", "description": "HP CF289Y & CANON T06 & CRG-056H Chipsiz UYUMLUDUR.20K BASKI KAPASİTESİNE SAHİPTİR.", "img": "https://static.wixstatic.com/media/899f39_7a105be0b2954d33963d6ac11f8c132b~mv2.png"}, {"name": "HP CE505XL,CF280XL & CRG-719HXL İTHAL TONER", "brand": "HP", "price": 560.0, "strikePrice": 0.0, "sku": "toner15_2", "category": "Toner & Kartuş", "ribbon": "", "description": "HP CE505XL,CF280XL & CRG-719HXL UYUMLUDUR.10K BASKI KAPASİTESİNE SAHİPTİR.", "img": "https://static.wixstatic.com/media/899f39_2d7ceb344e944ff4abbc61a469c53c36~mv2.jpg"}, {"name": "HP CE505X,CF280X & CANON CRG-719H (6.9K) İTHAL TONER", "brand": "HP", "price": 450.0, "strikePrice": 0.0, "sku": "toner16", "category": "Toner & Kartuş", "ribbon": "", "description": "HP CE505X,CF280X & CANON CRG-719H UYUMLUDUR.6.9K BASKI KAPASİTESİNE SAHİPTİR.", "img": "https://static.wixstatic.com/media/899f39_96fb1fdf5e224714b806dc0d2e78ec6b~mv2.jpg"}, {"name": "HP CE505A,CF280A & CANON CRG-719 (2.7K) İTHAL TONER", "brand": "HP", "price": 390.0, "strikePrice": 0.0, "sku": "toner16_2", "category": "Toner & Kartuş", "ribbon": "", "description": "HP CE505A,CF280A & CANON CRG-719 UYUMLUDUR.2.7K BASKI KAPASİTESİNE SAHİPTİR.", "img": "https://static.wixstatic.com/media/899f39_8be400a8be2e477cba7fdf011a653d87~mv2.jpg"}, {"name": "HP CF259X (59x) & CANON CRG-057H & T08 Chipsiz (10K) İTHAL TONER", "brand": "HP", "price": 495.0, "strikePrice": 0.0, "sku": "toner17", "category": "Toner & Kartuş", "ribbon": "", "description": "HP CF259X (59x) & CANON CRG-057H & T08 Chipsiz UYUMLUDUR.10K BASKI KAPASİTESİNE SAHİPTİR.", "img": "https://static.wixstatic.com/media/899f39_4afb065767b24417978d058fefbe1f94~mv2.jpg"}, {"name": "HP CF217A (17A) & CANON CRG-047 (1.6K) İTHAL TONER", "brand": "HP", "price": 300.0, "strikePrice": 0.0, "sku": "toner17_2", "category": "Toner & Kartuş", "ribbon": "", "description": "HP CF217A (17A) & CANON CRG-047 İTHAL TONER1.6K BASKİ KAPASİTESİNE SAHİPTİR.", "img": "https://static.wixstatic.com/media/899f39_c8f29807733b49b7bda19eb053924709~mv2.jpg"}, {"name": "HP W1106XL (106XL) (5K) İTHAL TONER", "brand": "HP", "price": 450.0, "strikePrice": 0.0, "sku": "toner18", "category": "Toner & Kartuş", "ribbon": "", "description": "HP W1106XL (106XL) UYUMLUDUR5K BASKI KAPASİTESİNE SAHİPTİR.", "img": "https://static.wixstatic.com/media/899f39_0b5fd68aee3341978a251ebee5e6587e~mv2.jpg"}, {"name": "HP CF226X (26X) & CANON CRG-052H (9.2K) İTHAL TONER", "brand": "HP", "price": 490.0, "strikePrice": 0.0, "sku": "toner18_2", "category": "Toner & Kartuş", "ribbon": "", "description": "HP CF226X (26X) & CANON CRG-052H UYUMLUDUR.9.2K BASKI KAPASİTESİNE SAHİPTİR.", "img": "https://static.wixstatic.com/media/899f39_ea5c572ff66445a0870ada7193998c3f~mv2.jpg"}, {"name": "Termal Pos Rulo 56x14m 5 Paket 50'Li KLAS", "brand": "KLAS", "price": 290.0, "strikePrice": 0.0, "sku": "pos1", "category": "Termal & POS Rulo", "ribbon": "", "description": "5 Paket toplamda 50 Rulo vardır.Ürünler BPA İçermez.TSEK Belgelidir.Tam metraj kaliteli kağıttır.Ofiseuygun ( SATT Büro ), KLAS Markanın yetkili satış bayisidir.", "img": "https://static.wixstatic.com/media/899f39_49de997ff602441a8dca9b80fed37c53~mv2.png"}, {"name": "Termal Pos Rulo 56x14m 10 Paket 100'Li KLAS", "brand": "KLAS", "price": 580.0, "strikePrice": 0.0, "sku": "pos2", "category": "Termal & POS Rulo", "ribbon": "", "description": "10 Paket toplamda 100 Rulo vardır.Ürünler BPA İçermez.TSEK Belgelidir.Tam metraj kaliteli kağıttır.Ofiseuygun ( SATT Büro ), KLAS Markanın yetkili satış bayisidir.", "img": "https://static.wixstatic.com/media/899f39_2f70e1a4ae44449cb8446b11a9c2aca8~mv2.png"}, {"name": "Termal Pos Rulo 56x14m 20 Paket 200'Li KLAS", "brand": "KLAS", "price": 1150.0, "strikePrice": 0.0, "sku": "pos3", "category": "Termal & POS Rulo", "ribbon": "", "description": "20 Paket toplamda 200 Rulo vardır.Ürünler BPA İçermez.TSEK Belgelidir.Tam metraj kaliteli kağıttır.Ofiseuygun ( SATT Büro ), KLAS Markanın yetkili satış bayisidir.", "img": "https://static.wixstatic.com/media/899f39_b745e9bafa8b4d5aa9d147d72da15e0c~mv2.png"}, {"name": "Termal Pos Rulo 56x14m 30 Paket 300'Li KLAS", "brand": "KLAS", "price": 1600.0, "strikePrice": 0.0, "sku": "pos4", "category": "Termal & POS Rulo", "ribbon": "", "description": "30 Paket toplamda 300 Rulo vardır.Ürünler BPA İçermez.TSEK Belgelidir.Tam metraj kaliteli kağıttır.Ofiseuygun ( SATT Büro ), KLAS Markanın yetkili satış bayisidir.", "img": "https://static.wixstatic.com/media/899f39_cb206467c59946f58f8140fd202a106d~mv2.png"}, {"name": "Termal Pos Rulo 56x14m 56 Paket 560'Li KLAS", "brand": "KLAS", "price": 3900.0, "strikePrice": 0.0, "sku": "pos5", "category": "Termal & POS Rulo", "ribbon": "", "description": "56 Paket toplamda 560 Rulo vardır. KOLİÜrünler BPA İçermez.TSEK Belgelidir.Tam metraj kaliteli kağıttır.Ofiseuygun ( SATT Büro ), KLAS Markanın yetkili satış bayisidir.", "img": "https://static.wixstatic.com/media/899f39_53cb2699f1df4f2ca03b910df1f9b225~mv2.png"}, {"name": "Termal Pos Rulo 56x14m 5 Paket 50'Li TEKNO", "brand": "TEKNO", "price": 360.0, "strikePrice": 0.0, "sku": "pos6", "category": "Termal & POS Rulo", "ribbon": "", "description": "56x14m boyutlarındadır.5 Paket toplamda 50 Rulo vardır.Ürünler BPA İçermez.TSEK Belgelidir.Tam metraj kaliteli kağıttır.Ofiseuygun ( SATT Büro ), TEKNO Markanın yetkili satış bayisidir.", "img": "https://static.wixstatic.com/media/899f39_6c5cf1dfecfb48a0a84410254667a299~mv2.png"}, {"name": "Termal Pos Rulo 56x14m 10 Paket 100'Li TEKNO", "brand": "TEKNO", "price": 700.0, "strikePrice": 0.0, "sku": "pos7", "category": "Termal & POS Rulo", "ribbon": "", "description": "56x14m boyutlarındadır.10 Paket toplamda 100 Rulo vardır.Ürünler BPA İçermez.TSEK Belgelidir.Tam metraj kaliteli kağıttır.Ofiseuygun ( SATT Büro ), TEKNO Markanın yetkili satış bayisidir.", "img": "https://static.wixstatic.com/media/899f39_9a2e7fbc62fe45a5ac56d47dc9b0dc43~mv2.png"}, {"name": "Termal Pos Rulo 56x14m 20 Paket 200'Li TEKNO", "brand": "TEKNO", "price": 1400.0, "strikePrice": 0.0, "sku": "pos7_2", "category": "Termal & POS Rulo", "ribbon": "", "description": "56x14m boyutlarındadır.20 Paket toplamda 200 Rulo vardır.Ürünler BPA İçermez.TSEK Belgelidir.Tam metraj kaliteli kağıttır.Ofiseuygun ( SATT Büro ), TEKNO Markanın yetkili satış bayisidir.", "img": "https://static.wixstatic.com/media/899f39_c90316517e7f4febbc811a9885e133e7~mv2.png"}, {"name": "Termal Pos Rulo 56x14m 30 Paket 300'Li TEKNO", "brand": "TEKNO", "price": 2100.0, "strikePrice": 0.0, "sku": "pos8", "category": "Termal & POS Rulo", "ribbon": "", "description": "56x14m boyutlarındadır.30 Paket toplamda 300 Rulo vardır.Ürünler BPA İçermez.TSEK Belgelidir.Tam metraj kaliteli kağıttır.Ofiseuygun ( SATT Büro ), TEKNO Markanın yetkili satış bayisidir.", "img": "https://static.wixstatic.com/media/899f39_3daaafd5df4a4373abf78b54ce9d4bd6~mv2.png"}, {"name": "Termal Pos Rulo 56x14m 60 Paket 600'Li TEKNO", "brand": "TEKNO", "price": 4200.0, "strikePrice": 0.0, "sku": "pos8wa", "category": "Termal & POS Rulo", "ribbon": "", "description": "56x14m boyutlarındadır.60 Paket toplamda 600 Rulo vardır. KOLİÜrünler BPA İçermez.TSEK Belgelidir.Tam metraj kaliteli kağıttır.Ofiseuygun ( SATT Büro ), TEKNO Markanın yetkili satış bayisidir.", "img": "https://static.wixstatic.com/media/899f39_0eee975613584599a510dcc131e5f777~mv2.png"}, {"name": "A4 Fotokopi Kağıdı 500 Sayfa 80gr SvetoCopy", "brand": "SvetoCopy", "price": 600.0, "strikePrice": 0.0, "sku": "kagıt1", "category": "Yazıcı & Fotokopi", "ribbon": "", "description": "A4 Fotokopi Kağıdı 500 Sayfa 80gr SvetoCopy", "img": "https://static.wixstatic.com/media/899f39_3d4bb0b788b14ea3b7aaf83992924bf9~mv2.jpg"}, {"name": "Kraf Poşet Dosya A4 100lü Paket", "brand": "KRAF", "price": 100.0, "strikePrice": 0.0, "sku": "krtsy1", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Poşet Dosya A4 100lü Paket", "img": "https://static.wixstatic.com/media/899f39_3d543b2ae6954f06b6fc568480f9fcf6~mv2.png"}, {"name": "Pritt 43 Gram (büyük Boy) Stick Yapıştırıcı", "brand": "Pritt", "price": 90.0, "strikePrice": 0.0, "sku": "krtsy2", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Pritt 43 Gram (büyük Boy) Stick Yapıştırıcı", "img": "https://static.wixstatic.com/media/899f39_c8a36aa350914cfd8376bacfa3ceb0af~mv2.png"}, {"name": "Kraf Geniş Klasör Mavi", "brand": "KRAF", "price": 120.0, "strikePrice": 0.0, "sku": "krtsy3", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Geniş Klasör Mavi", "img": "https://static.wixstatic.com/media/899f39_5c464b9c0bdd4cdbabd9e268ee2b9e25~mv2.jpg"}, {"name": "Kraf Dar Klasör Mavi", "brand": "KRAF", "price": 120.0, "strikePrice": 0.0, "sku": "krtsy4", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Dar Klasör Mavi", "img": "https://static.wixstatic.com/media/899f39_e1953f48250d416e9a540aba2952d9c5~mv2.jpg"}, {"name": "NOKİ Zımba Teli no:10 1000'li 20 Kutu", "brand": "Noki", "price": 199.0, "strikePrice": 0.0, "sku": "krtsy5", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Her pakette 1000 adet olmak üzere toplamda 20.000 adet zımba teli bulunmaktadır.", "img": "https://static.wixstatic.com/media/899f39_957ed2455b4e4c17bbe57e806ac4d321~mv2.jpg"}, {"name": "Kraf Zımba Teli No 10 Sarı 20 Kutu 1000li 245G", "brand": "KRAF", "price": 199.0, "strikePrice": 0.0, "sku": "krtsy6", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "20 kutu 1000'li toplamda 20000 adet zımba teli vardır.", "img": "https://static.wixstatic.com/media/899f39_1323e1450fc04bde8e18be348bac6350~mv2.png"}, {"name": "Kraf Zımba Teli No 10, 10 Kutu 1000li 245G", "brand": "KRAF", "price": 150.0, "strikePrice": 0.0, "sku": "krtsy7", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "10 kutu 1000'li toplamda 10000 adet zımba teli bulunmaktadır", "img": "https://static.wixstatic.com/media/899f39_24f33b12949d4380820b4f24955a47ef~mv2.png"}, {"name": "Mas Zımba Teli No 10 10 Kutu 1000li Bakır", "brand": "Mas", "price": 100.0, "strikePrice": 0.0, "sku": "krtsy8", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "10 Kutu 1000li 10000 adet zımba teli vardır.", "img": "https://static.wixstatic.com/media/899f39_f3aca39240c946f08fabe9a5aa3ea883~mv2.png"}, {"name": "Bion Galvanizli Zımba Teli No:24/6 Metalik 1000 Li Kutu 20 Paket", "brand": "Bion", "price": 180.0, "strikePrice": 0.0, "sku": "krtsy9", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Bion Galvanizli Zımba Teli No:24/6 Metalik 1000 Li Kutu 20 Paket", "img": "https://static.wixstatic.com/media/899f39_c0865f89ca124e30b87a321b0b711816~mv2.png"}, {"name": "Mas 145 Zımba Teli No:24/6 1000'li Beyaz - 10'lu Kutu", "brand": "Mas", "price": 150.0, "strikePrice": 0.0, "sku": "krtsy10", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas 145 Zımba Teli No:24/6 1000'li Beyaz - 10'lu Kutu", "img": "https://static.wixstatic.com/media/899f39_e684eccfb4294ba19f3e28aa1f444f4d~mv2.webp"}, {"name": "Rapid 24/6 Standard 1000'li 20 Kutu", "brand": "Rapid", "price": 540.0, "strikePrice": 0.0, "sku": "krtsy11", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Rapid 24/6 Standard 1000'li 20 Kutu 20000 adet zımba teli vardır.", "img": "https://static.wixstatic.com/media/899f39_aadc87e5184b4dc3b72ae0ce07218306~mv2.png"}, {"name": "Delta Zımba 24/6 Teli Beyaz 1000'li 10 Kutu", "brand": "Delta", "price": 150.0, "strikePrice": 0.0, "sku": "krtsy12", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Delta Zımba Teli Beyaz 1000'li 10 Kutu 10000 adet zımba teli vardır.", "img": "https://static.wixstatic.com/media/899f39_9fc3c43a28894d1ba1918b8dab271b04~mv2.png"}, {"name": "Delta Zımba Teli 24/6 1000'Li 10 Kutu Sarı", "brand": "Delta", "price": 150.0, "strikePrice": 0.0, "sku": "krtsy13", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Delta Zımba Teli 24/6 1000'Li 10 Kutu Sarı", "img": "https://static.wixstatic.com/media/899f39_5db015612be049c68afaa66cae548529~mv2.png"}, {"name": "Esselte Geniş Klasör - Siyah 9940", "brand": "Esselte", "price": 125.0, "strikePrice": 0.0, "sku": "krtsy14", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Esselte Geniş Klasör - Siyah 9940", "img": "https://static.wixstatic.com/media/899f39_0bfac342fbdf4d4b813eac73b57909e1~mv2.jpg"}, {"name": "Esselte Plastik Klasör Dar A4 Siyah 9945", "brand": "Esselte", "price": 125.0, "strikePrice": 0.0, "sku": "krtsy15", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Esselte Plastik Klasör Dar A4 Siyah 9945", "img": "https://static.wixstatic.com/media/899f39_02bb6098de7c475fb24e49f191812c9d~mv2.png"}, {"name": "Esselte Plastik Klasör Dar A4 Kırmızı 9945", "brand": "Esselte", "price": 125.0, "strikePrice": 0.0, "sku": "krtsy15_2", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Esselte Plastik Klasör Dar A4 Kırmızı 9945", "img": "https://static.wixstatic.com/media/899f39_7cdf1b580ed64c8197d63c0f1cffe3e0~mv2.png"}, {"name": "Mas Dolphin Delgeç 20 Sayfa Kapasiteli Yeşil 0752", "brand": "Mas", "price": 100.0, "strikePrice": 0.0, "sku": "krtsy16", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas Dolphin Delgeç 20 Sayfa Kapasiteli Yeşil 0752", "img": "https://static.wixstatic.com/media/899f39_59556b12340d47a9a5c4b5ffec6b4a70~mv2.png"}, {"name": "Mas Dolphin Delgeç 20 Sayfa Kapasiteli Mavi 0752", "brand": "Mas", "price": 100.0, "strikePrice": 0.0, "sku": "krtsy16_2", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas Dolphin Delgeç 20 Sayfa Kapasiteli Mavi 0752", "img": "https://static.wixstatic.com/media/899f39_2ce10307cbb94a2db9c0fafe76875615~mv2.png"}, {"name": "Mas Dolphin 20 Sayfa Turuncu Delgeç", "brand": "Mas", "price": 100.0, "strikePrice": 0.0, "sku": "krtsy42", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas Dolphin 20 Sayfa Turuncu Delgeç", "img": "https://static.wixstatic.com/media/899f39_2162d196f86b4ae1bf20b8b771d48f8f~mv2.png"}, {"name": "Kraf Delgeç 140G Siyah 20 Sayfa", "brand": "KRAF", "price": 140.0, "strikePrice": 0.0, "sku": "krtsy17", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Delgeç 140G Siyah 20 Sayfa", "img": "https://static.wixstatic.com/media/899f39_c8b75d452b02456db8f23d4ad41462c4~mv2.png"}, {"name": "Kraf Delgeç 140G Mavi 20 Sayfa", "brand": "KRAF", "price": 145.0, "strikePrice": 0.0, "sku": "krtsy18", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Delgeç 140G Mavi 20 Sayfa", "img": "https://static.wixstatic.com/media/899f39_5fd3cc8a6b6e4b2b9001ada99af639eb~mv2.png"}, {"name": "Kraf Delgeç 150G Mavi 30 Sayfa", "brand": "KRAF", "price": 165.0, "strikePrice": 0.0, "sku": "krtsy19", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Delgeç 150G Mavi 30 Sayfa", "img": "https://static.wixstatic.com/media/899f39_5f8077b7c11e4d32a08b82a11cc83c28~mv2.png"}, {"name": "Edding 260 Tahta Kalemi Siyah", "brand": "Edding", "price": 39.0, "strikePrice": 0.0, "sku": "krtsy20", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Edding 260 Tahta Kalemi Siyah", "img": "https://static.wixstatic.com/media/899f39_d0d12d05cc2d409098e08b381d961772~mv2.png"}, {"name": "Edding 260 Tahta Kalemi Mavi", "brand": "Edding", "price": 39.0, "strikePrice": 0.0, "sku": "krtsy21", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Edding 260 Tahta Kalemi Mavi", "img": "https://static.wixstatic.com/media/899f39_fe52b1cb7d4c4367a3ea49853a3c02cc~mv2.png"}, {"name": "Edding 103 Kalıcı Işaretleyici Marker Siyah Kalem", "brand": "Edding", "price": 39.0, "strikePrice": 0.0, "sku": "krtsy22", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Edding 103 Kalıcı Işaretleyici Marker Siyah Kalem", "img": "https://static.wixstatic.com/media/899f39_df840d5192a445e299164298be614776~mv2.png"}, {"name": "Picador 501 Beyaz Tahta Kalemi – Mavi Doldurulabilir", "brand": "Picador", "price": 39.0, "strikePrice": 0.0, "sku": "krtsy23", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Picador 501 Beyaz Tahta Kalemi – Mavı Doldurulabilir", "img": "https://static.wixstatic.com/media/899f39_44bbd9202303447091854b0c3cb3e2e9~mv2.png"}, {"name": "Picador 601 Beyaz Tahta Kalemi – Kırmızı Doldurulabilir", "brand": "Picador", "price": 39.0, "strikePrice": 0.0, "sku": "krtsy44", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Picador 601 Beyaz Tahta Kalemi – Kırmızı Doldurulabilir", "img": "https://static.wixstatic.com/media/899f39_0c563cbf57854771b17d2972fd4af7f9~mv2.png"}, {"name": "Brons BR-968 Siyah Tahta Kalemi", "brand": "Brons", "price": 35.0, "strikePrice": 0.0, "sku": "krtsy24", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Brons BR-968 Siyah Tahta Kalemi", "img": "https://static.wixstatic.com/media/899f39_b37c2db6106e43aaa6b0e6e648e9c6a4~mv2.png"}, {"name": "Mas Para Süngeri", "brand": "Mas", "price": 70.0, "strikePrice": 0.0, "sku": "krtsy38", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas Para Süngeri", "img": "https://static.wixstatic.com/media/899f39_3e6d17a148cc48599033b1f9de68ddc0~mv2.png"}, {"name": "Noki Twingo Şerit Silici ", "brand": "Noki", "price": 45.0, "strikePrice": 0.0, "sku": "krtsy25", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Noki Twingo Şerit Silici", "img": "https://static.wixstatic.com/media/899f39_fcee367e0bc0452b97a1acb675fc7a62~mv2.jpg"}, {"name": "Kraf Perfore Evrak Rafı Metal 3 Katlı Siyah 460G", "brand": "KRAF", "price": 400.0, "strikePrice": 0.0, "sku": "krtsy26", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Perfore Evrak Rafı Metal 3 Katlı Siyah 460G", "img": "https://static.wixstatic.com/media/899f39_840afcc365b14d378b94b0f3f0eb9ccb~mv2.png"}, {"name": "Kraf 829G Raylı Evrak Rafı Plastik Hareketli Şeffaf 3'lü", "brand": "KRAF", "price": 400.0, "strikePrice": 0.0, "sku": "krtsy27", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf 829G Raylı Evrak Rafı Plastik Hareketli Şeffaf 3'lü", "img": "https://static.wixstatic.com/media/899f39_418496c5cd27484bb38bbe5851c7afeb~mv2.png"}, {"name": "Std Delgeç P-817 Mavi", "brand": "Noki", "price": 100.0, "strikePrice": 0.0, "sku": "krtsy28", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Std Delgeç P-817 Mavi", "img": "https://static.wixstatic.com/media/899f39_c8271d395ff34f748e6cecd1eb07eb5b~mv2.png"}, {"name": "Std Delgeç P-817 Smoke", "brand": "Noki", "price": 100.0, "strikePrice": 0.0, "sku": "krtsy26_2", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Std Delgeç P-817 Smoke", "img": "https://static.wixstatic.com/media/899f39_2b3fd063bd134e8db4155b897cde5cee~mv2.png"}, {"name": "Kraf Zımba Makinası No:24/6 Mavi", "brand": "KRAF", "price": 130.0, "strikePrice": 0.0, "sku": "krtsy29", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Zımba Makinası No:24/6 Mavi", "img": "https://static.wixstatic.com/media/899f39_0a7f4b49ac2f484fb7318647f35c24df~mv2.png"}, {"name": "Kraf Zımba Makinası No 10 10G Gri", "brand": "KRAF", "price": 90.0, "strikePrice": 0.0, "sku": "krtsy30", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Zımba Makinası No 10 10G Gri", "img": "https://static.wixstatic.com/media/899f39_f78c1fcc98ba4420bc4760cdf7740cc9~mv2.jpg"}, {"name": "Kraf Blok Küp Kağıt 8x8 cm 500 Yaprak", "brand": "KRAF", "price": 37.0, "strikePrice": 0.0, "sku": "krtsy31", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Blok Küp Kağıt 8x8 cm 500 Yaprak", "img": "https://static.wixstatic.com/media/899f39_f9fddb6593d14cd087a958af540d7ad2~mv2.jpg"}, {"name": "Rotring Tikky Kaliteli Versatil Kalem Set 0.7 Silgi Kalem Ucu Mekanik Uçlu ", "brand": "Rotring", "price": 240.0, "strikePrice": 0.0, "sku": "krtsy32", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Rotring Tikky Kaliteli Versatil Kalem Set 0.7 Silgi Kalem Ucu Mekanik Uçlu", "img": "https://static.wixstatic.com/media/899f39_9b02ffefea7e4cc8aaaec08b8dfcab16~mv2.png"}, {"name": "Rotring Tikky Kaliteli Versatil Kalem Set 0.7 Silgi Kalem Ucu Mekanik Uçlu Mavi", "brand": "Rotring", "price": 240.0, "strikePrice": 0.0, "sku": "krtsy33", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Rotring Tikky Kaliteli Versatil Kalem Set 0.7 Silgi Kalem Ucu Mekanik Uçlu mavi", "img": "https://static.wixstatic.com/media/899f39_ad23f3c2f9ae41178e3e80f3c4a23492~mv2.jpg"}, {"name": "Rotring Tikky Kaliteli Versatil Kalem Set 0.5 Silgi Kalem Ucu Mekanik Uçlu Beyaz", "brand": "Rotring", "price": 240.0, "strikePrice": 0.0, "sku": "krtsy34", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Rotring Tikky Kaliteli Versatil Kalem Set 0.5 Silgi Kalem Ucu Mekanik Uçlu Beyaz", "img": "https://static.wixstatic.com/media/899f39_f411b7833b2b4a79ada3ba2dce93ed91~mv2.jpg"}, {"name": "TEKNO Adisyon Rulosu 80 x 80 mm 10 Paket 100'LU Rulo", "brand": "TEKNO", "price": 4000.0, "strikePrice": 0.0, "sku": "pos11", "category": "Termal & POS Rulo", "ribbon": "", "description": "TEKNO Adisyon Rulosu 80 x 80 mm 10 Paket 100'LU Rulo", "img": "https://static.wixstatic.com/media/899f39_577a57f230cd4b7db05c4e86ee706c14~mv2.png"}, {"name": "TEKNO Adisyon Rulosu 80 x 40 mm 18 Paket 180'LU Rulo", "brand": "TEKNO", "price": 4000.0, "strikePrice": 0.0, "sku": "pos12", "category": "Termal & POS Rulo", "ribbon": "", "description": "TEKNO Adisyon Rulosu 80 x 40 mm 18 Paket 180'LU Rulo", "img": "https://static.wixstatic.com/media/899f39_9050234e3c0948a4a335edb1497215d1~mv2.png"}, {"name": "Kraf 330 Fosforlu Kalem 5 Adet - Karışık Renk ", "brand": "KRAF", "price": 0.0, "strikePrice": 0.0, "sku": "", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf 330 Fosforlu Kalem 5 Adet - Karışık Renk", "img": "https://static.wixstatic.com/media/899f39_52f4a5f174c14ff7a7454481a767bc66~mv2.webp"}, {"name": "Vege Selefon Bant 12*33", "brand": "Vege", "price": 25.0, "strikePrice": 0.0, "sku": "krtsy27_2", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Vege Selefon Bant 12*33", "img": "https://static.wixstatic.com/media/899f39_e82d1c7027744f2a9f3ca96b9d318811~mv2.png"}, {"name": "Silka Kurşun Kalem 4 Renk Paket", "brand": "Silka", "price": 40.0, "strikePrice": 0.0, "sku": "krtsy36", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "SİLKA KURŞUN KALEM ÜÇGEN PASTEL", "img": "https://static.wixstatic.com/media/899f39_5a1111f78c19454c9a4c8180c504a90d~mv2.png"}, {"name": "Silka Kurşun Kalem 4 Renk Üçgen Metalik 1 Paket", "brand": "Silka", "price": 40.0, "strikePrice": 0.0, "sku": "krtsy37", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Silka Kurşun Kalem 4 Renk Üçgen Metalik 1 Paket", "img": "https://static.wixstatic.com/media/899f39_b270f55c0ad7477d87a593e460e28f9b~mv2.jpg"}, {"name": "Dilman Kasa Defteri 16x22 368 Yaprak", "brand": "Dilman", "price": 450.0, "strikePrice": 0.0, "sku": "krtsy39", "category": "Defter & Ajanda", "ribbon": "", "description": "Dilman Kasa Defteri 16x22 368 Yaprak", "img": "https://static.wixstatic.com/media/899f39_b1d3d8cbe91942f88b76840c4dbc5d51~mv2.png"}, {"name": "Dilman Kasa Defteri 20 x 28 cm - 368 Yaprak", "brand": "Dilman", "price": 490.0, "strikePrice": 0.0, "sku": "krtys40", "category": "Defter & Ajanda", "ribbon": "", "description": "Dilman Kasa Defteri 20 x 28 cm - 368 Yaprak", "img": "https://static.wixstatic.com/media/899f39_78868cccae104d979550466c4f6b53a1~mv2.png"}, {"name": "Faber-Castell 1425 İğne Uçlu Mavi Tükenmez Kalem", "brand": "Faber-Castell", "price": 25.0, "strikePrice": 0.0, "sku": "krtsy41", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Faber-Castell 1425 İğne Uçlu Mavi Tükenmez Kalem", "img": "https://static.wixstatic.com/media/899f39_bbc2efbed7b74d1e9629c98730a80a5e~mv2.jpg"}, {"name": "Pensan My-Tech 0.7 Tükenmez Kalem Mavi", "brand": "Pensan", "price": 25.0, "strikePrice": 0.0, "sku": "krtsy43", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Pensan My-Tech 0.7 Tükenmez Kalem Mavi", "img": "https://static.wixstatic.com/media/899f39_daa69d7df6a748a8963707cb7427876b~mv2.jpg"}, {"name": "Pensan My King Gel 0.5 İğne Uç Metal Klips Kalem 6405", "brand": "Pensan", "price": 45.0, "strikePrice": 0.0, "sku": "krtsy45", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Pensan My King Gel 0.5 İğne Uç Metal Klips Kalem 6405", "img": "https://static.wixstatic.com/media/899f39_80c4a20527884ff8b235da985bb0dd87~mv2.png"}, {"name": "Pensan Triball 1003 Tükenmez Kalem 1.0 mm Adet - Mavi", "brand": "Pensan", "price": 25.0, "strikePrice": 0.0, "sku": "krtsy46", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Pensan Triball 1003 Tükenmez Kalem 1.0 mm Adet - Mavi", "img": "https://static.wixstatic.com/media/899f39_c5f0b7abaddd45ae9efc270b4203b799~mv2.png"}, {"name": "Pensan Tükenmez Kalem Büro Ball Point 1 mm Siyah 50 ' Lİ", "brand": "Pensan", "price": 175.0, "strikePrice": 0.0, "sku": "krtsy47", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Pensan Tükenmez Kalem Büro Ball Point 1 mm Siyah 50 ' li", "img": "https://static.wixstatic.com/media/899f39_0603d8a39ec84e14a8c2fc0bde8580e1~mv2.png"}, {"name": "Pensan Tükenmez Kalem Büro Ball Point 1 mm Mavi 50'li", "brand": "Pensan", "price": 175.0, "strikePrice": 0.0, "sku": "krtsy48", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Pensan Tükenmez Kalem Büro Ball Point 1 mm Mavi", "img": "https://static.wixstatic.com/media/899f39_508eef2bc1774aca9ac075d3acd200f9~mv2.png"}, {"name": "Pensan Tükenmez Kalem Büro Ball Point 1 mm Kırmızı 50'li", "brand": "Pensan", "price": 175.0, "strikePrice": 0.0, "sku": "krtsy49", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Pensan Tükenmez Kalem Büro Ball Point 1 mm Kırmızı", "img": "https://static.wixstatic.com/media/899f39_105a3cddd64e4d5882d30e053464553d~mv2.png"}, {"name": "KRAF Beyaz Silgi 745G 30 'lu Kutu", "brand": "KRAF", "price": 160.0, "strikePrice": 0.0, "sku": "krtsy60", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "KRAF Beyaz Silgi 745G 30 'lu Kutu", "img": "https://static.wixstatic.com/media/899f39_b4dce6723589409fabf1ceaacf52e520~mv2.png"}, {"name": "KRAF Beyaz Silgi 735G 20 'li Kutu", "brand": "KRAF", "price": 160.0, "strikePrice": 0.0, "sku": "krtsy61", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "KRAF Beyaz Silgi 735G 20 'li Kutu", "img": "https://static.wixstatic.com/media/899f39_5d01b7d1c23144deaf532ee0333376ee~mv2.png"}, {"name": "Silka Kaly Sınav Silgisi Beyaz (24 Adet) Kutu", "brand": "Silka", "price": 144.0, "strikePrice": 0.0, "sku": "krtsy62", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Silka Kaly Sınav Silgisi Beyaz (24 Adet) Kutu", "img": "https://static.wixstatic.com/media/899f39_b9cc2cd67d36469588fc3c06cb4fd6ca~mv2.png"}, {"name": "Brons Beyaz Tahta Kalemi Mürekkebi Mavi 100 cc BR-353", "brand": "Brons", "price": 120.0, "strikePrice": 0.0, "sku": "krtsy63", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Brons Beyaz Tahta Kalemi Mürekkebi Mavi 100 cc BR-353", "img": "https://static.wixstatic.com/media/899f39_2ad25742315b4ff58e3e93e46a225137~mv2.png"}, {"name": "Brons Beyaz Tahta Kalemi Mürekkebi Siyah 100 cc BR-353", "brand": "Brons", "price": 120.0, "strikePrice": 0.0, "sku": "krtsy65", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Brons Beyaz Tahta Kalemi Mürekkebi Siyah 100 cc BR-353", "img": "https://static.wixstatic.com/media/899f39_dcc8bee884734bbfb8bdeb11e3821cdf~mv2.png"}, {"name": "Brons Beyaz Tahta Kalemi Mürekkebi Kırmızı 100 cc BR-353", "brand": "Brons", "price": 120.0, "strikePrice": 0.0, "sku": "krtys66", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Brons Beyaz Tahta Kalemi Mürekkebi Kırmızı 100 cc BR-353", "img": "https://static.wixstatic.com/media/899f39_13254ebab3684d57a3c02a57fb561293~mv2.png"}, {"name": "Mas Ambalaj Lastiği 500 Gr %100 Kauçuk", "brand": "Mas", "price": 180.0, "strikePrice": 0.0, "sku": "krtsy67", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Mas Ambalaj Lastiği 500 Gr %100 Kauçuk", "img": "https://static.wixstatic.com/media/899f39_a884fe8f1dff4b22a2ae413ef175a594~mv2.png"}, {"name": "Kraf Ambalaj Lastiği 500 Gr %100 Kauçuk 950G", "brand": "KRAF", "price": 160.0, "strikePrice": 0.0, "sku": "krtsy68", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Kraf Ambalaj Lastiği 500 Gr %100 Kauçuk 950G", "img": "https://static.wixstatic.com/media/899f39_b70120d6452d426f991fe688058fbd36~mv2.png"}, {"name": "Kraf Ambalaj Lastiği 50 Gr %100 Kauçuk 960G", "brand": "KRAF", "price": 45.0, "strikePrice": 0.0, "sku": "krtsy69", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Kraf Ambalaj Lastiği 50 Gr %100 Kauçuk 960G", "img": "https://static.wixstatic.com/media/899f39_89ca2c75ec6141cba40c98d52504a868~mv2.png"}, {"name": "Mas Ambalaj Lastiği 50 Gr %100 Kauçuk", "brand": "Mas", "price": 55.0, "strikePrice": 0.0, "sku": "krtsy71", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Mas Ambalaj Lastiği 50 Gr %100 Kauçuk", "img": "https://static.wixstatic.com/media/899f39_e2ba0bfdf24d4cc2a24dfe940b99392d~mv2.jpg"}, {"name": "Mas 810 Desk Organizer Kalemlik Şeffaf", "brand": "Mas", "price": 250.0, "strikePrice": 0.0, "sku": "krtsy72", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas 810 Desk Organizer Kalemlik Şeffaf", "img": "https://static.wixstatic.com/media/899f39_35c498c37c0a418caabed26ad1aafb93~mv2.jpg"}, {"name": "Mas Üçlü Set 0505 Siyah", "brand": "Mas", "price": 195.0, "strikePrice": 0.0, "sku": "krtsy73", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas Üçlü Set 0505 Siyah", "img": "https://static.wixstatic.com/media/899f39_e68c11168ef04bbbb5dbb479a13d60c9~mv2.png"}, {"name": "Mas 810 Desk Organizer Kalemlik Şeffaf", "brand": "Mas", "price": 250.0, "strikePrice": 0.0, "sku": "krtsy74", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas 810 Desk Organizer Kalemlik Şeffaf", "img": "https://static.wixstatic.com/media/899f39_d012afd1a0fe4dddb115195c6c928532~mv2.jpg"}, {"name": "Prıtt Yapıştırıcı Stıck 22 Gr 208845", "brand": "Pritt", "price": 70.0, "strikePrice": 0.0, "sku": "krtsy75", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Prıtt Yapıştırıcı Stıck 22 Gr 208845", "img": "https://static.wixstatic.com/media/899f39_7802ae030a7f447db24772b76f99a358~mv2.jpg"}, {"name": "Umix Telli Dosya Mavi 50'li", "brand": "Umix", "price": 220.0, "strikePrice": 0.0, "sku": "krtsy76", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Umix Telli Dosya Mavi 50'li", "img": "https://static.wixstatic.com/media/899f39_3e4c2bf47bf64b698d11827db748d7f6~mv2.jpg"}, {"name": "Kraf Telli Dosya Mavi 50'li", "brand": "KRAF", "price": 210.0, "strikePrice": 0.0, "sku": "krtsy77", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Telli Dosya Mavi 50'li", "img": "https://static.wixstatic.com/media/899f39_220caf18243743deb5b9043f40ee6c6e~mv2.jpg"}, {"name": "Liz Ajanda 2026 Günlük Thermo Harita Baskılı 17x24 cm", "brand": "Liz", "price": 325.0, "strikePrice": 0.0, "sku": "krtsy80", "category": "Defter & Ajanda", "ribbon": "", "description": "Liz Ajanda 2026 Günlük Thermo Harita Baskılı 17x24 cm", "img": "https://static.wixstatic.com/media/899f39_81141d658ae042d2849e7882584d0e00~mv2.png"}, {"name": "Kraf 100G Bant Kesme Makinesi", "brand": "KRAF", "price": 85.0, "strikePrice": 0.0, "sku": "krtsy81", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf 100G Bant Kesme Makinesi", "img": "https://static.wixstatic.com/media/899f39_fb22b74b9f464248a6643acbbb8e3a42~mv2.png"}, {"name": "Kraf Mx-5500 Etiket Makinesi", "brand": "KRAF", "price": 400.0, "strikePrice": 0.0, "sku": "krtsy82", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Mx-5500 Etiket Makinesi", "img": "https://static.wixstatic.com/media/899f39_349c38af8000427c816ce6d2ba9ed82f~mv2.jpg"}, {"name": "Casio MX-12B Masaüstü Hesap Makinesi 12 Haneli", "brand": "Casio", "price": 375.0, "strikePrice": 0.0, "sku": "krtsy83", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Casio MX-12B Masaüstü Hesap Makinesi 12 Haneli", "img": "https://static.wixstatic.com/media/899f39_5bac9e3541df423f82dab5ca65817888~mv2.png"}, {"name": "Casio DH-16 Masaüstü Hesap Makinesi 16 Haneli", "brand": "Casio", "price": 790.0, "strikePrice": 0.0, "sku": "krtsy86", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Casio DH-16 Masaüstü Hesap Makinesi 16 Haneli", "img": "https://static.wixstatic.com/media/899f39_41d1a25a1c00489dba2908418009df0f~mv2.png"}, {"name": "Kraf Hesap Makinesi Masa Üstü 12 Hane Hm-125", "brand": "KRAF", "price": 275.0, "strikePrice": 0.0, "sku": "krtsy87", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Hesap Makinesi Masa Üstü 12 Hane Hm-125", "img": "https://static.wixstatic.com/media/899f39_669bad2c96b7490d943d92fbffee4e58~mv2.jpg"}, {"name": "Mas 6926 Bilimsel Fonksiyonlu Hesap Makinesi", "brand": "Mas", "price": 330.0, "strikePrice": 0.0, "sku": "krtsy88", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas 6926 Bilimsel Fonksiyonlu Hesap Makinesi", "img": "https://static.wixstatic.com/media/899f39_dec36b1aecd3442b9be5ada898f3a47a~mv2.png"}, {"name": "PRİTT PS20 SİLGİ PASTEL PVC", "brand": "Pritt", "price": 350.0, "strikePrice": 0.0, "sku": "krtsy87_2", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "PRİTT PS20 SİLGİ PASTEL PVC", "img": "https://static.wixstatic.com/media/899f39_9873c3a4a89947cd9f6440da546bdc33~mv2.png"}, {"name": "Kraf Stick Yapıştırıcı 40gr 4040", "brand": "KRAF", "price": 40.0, "strikePrice": 0.0, "sku": "krtsy90", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Stick Yapıştırıcı 40gr 4040", "img": "https://static.wixstatic.com/media/899f39_19b04317663f4b15822c2867a3f01557~mv2.png"}, {"name": "Kraf Asetat Kalemi Ohp Plus 280 (M)", "brand": "KRAF", "price": 40.0, "strikePrice": 0.0, "sku": "krtsy91", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Asetat Kalemi Ohp Plus 280 (M)", "img": "https://static.wixstatic.com/media/899f39_22bb139aca1b4231a8f848062bd13888~mv2.jpg"}, {"name": "Faber-Castell 1525 Permanent Asetat Kalem Siyah M Uç", "brand": "Faber-Castell", "price": 75.0, "strikePrice": 0.0, "sku": "krtsy92", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Faber-Castell 1525 Permanent Asetat Kalem Siyah M Uç", "img": "https://static.wixstatic.com/media/899f39_e12446c04e3d47049439ede8c6b66311~mv2.png"}, {"name": "Faber Castell Permanent Asetat Cd Kalemi S Yeşil", "brand": "Faber-Castell", "price": 75.0, "strikePrice": 0.0, "sku": "krtsy93", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Faber Castell Permanent Asetat Cd Kalemi S", "img": "https://static.wixstatic.com/media/899f39_bde1cf39dea645c7b7d384c3e82193a6~mv2.png"}, {"name": "Kraf 530G Çelik Cetvel İnch Ölçülü 30 cm", "brand": "KRAF", "price": 50.0, "strikePrice": 0.0, "sku": "krtsy94", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf 530G Çelik Cetvel İnch Ölçülü 30 cm", "img": "https://static.wixstatic.com/media/899f39_2a588e3220fe437885747857e4300471~mv2.jpg"}, {"name": "Yıldızlar 30 Cm. Polyester Cetvel Mercekli ", "brand": "", "price": 45.0, "strikePrice": 0.0, "sku": "krtsy95", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Yıldızlar 30 Cm. Polyester Cetvel Mercekli", "img": "https://static.wixstatic.com/media/899f39_56da9e4ffaaa43679a40ca4c99b5ed9c~mv2.png"}, {"name": "Mas 410 Fantastik Makas 17Cm", "brand": "Mas", "price": 65.0, "strikePrice": 0.0, "sku": "krtsy95_2", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas 410 Fantastik Makas 17Cm", "img": "https://static.wixstatic.com/media/899f39_9f308b6c00b44ccfad769a8e07fb01c1~mv2.jpeg"}, {"name": "Kraf 708G Akrilik Saplı Makas 21Cm", "brand": "KRAF", "price": 70.0, "strikePrice": 0.0, "sku": "krtsy96", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf 708G Akrilik Saplı Makas 21Cm", "img": "https://static.wixstatic.com/media/899f39_6f1ca1b881f84830bbf2263fba757e49~mv2.png"}, {"name": "Bic Marking Flat Highlighter Pembe Fosforlu Kalem", "brand": "Bic", "price": 50.0, "strikePrice": 0.0, "sku": "krtsy97", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Bic Marking Flat Highlighter Pembe Fosforlu Kalem", "img": "https://static.wixstatic.com/media/899f39_9a7a6b98e3884d6785666055ad04d125~mv2.png"}, {"name": "Brons Genel Amaçlı Sıvı Yapıştırıcı 18 gr.", "brand": "Brons", "price": 30.0, "strikePrice": 0.0, "sku": "krtsy99", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Brons Genel Amaçlı Sıvı Yapıştırıcı 18 gr.", "img": "https://static.wixstatic.com/media/899f39_9520eea69fad43978fae8e8da519254a~mv2.jpg"}, {"name": "Dilman Yoklamalı Sınıf Defteri", "brand": "Dilman", "price": 100.0, "strikePrice": 0.0, "sku": "krtsy100", "category": "Defter & Ajanda", "ribbon": "", "description": "Dilman Yoklamalı Sınıf Defteri", "img": "https://static.wixstatic.com/media/899f39_e79720e434c74805bcd7df2bf09ed59c~mv2.jpg"}, {"name": "Oyal Kare Zarf 110 gr Beyaz 114 x 162 Mm 500 lü", "brand": "Oyal", "price": 700.0, "strikePrice": 0.0, "sku": "kagıt2", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Oyal Kare Zarf 110 gr Beyaz 114 x 162 Mm 500 lü", "img": "https://static.wixstatic.com/media/899f39_9a0f7572ff6743afbbb5b28fca76a515~mv2.jpg"}, {"name": "KRAF Sunum Dosyası A4 40'lı Mavi", "brand": "KRAF", "price": 110.0, "strikePrice": 0.0, "sku": "krtsy101", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "KRAF Sunum Dosyası A4 40'lı Mavi", "img": "https://static.wixstatic.com/media/899f39_83b70c5d32a54f5e8659f838051a3fca~mv2.jpg"}, {"name": "Noki Prime Sunum Dosyası 10 Yaprak Kırmızı", "brand": "Noki", "price": 75.0, "strikePrice": 0.0, "sku": "krtsy102", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Noki Prime Sunum Dosyası 10 Yaprak Kırmızı", "img": "https://static.wixstatic.com/media/899f39_1cfc617ddd9a4a55ad652b11c685b894~mv2.jpg"}, {"name": "Delta Kod 111 Heavy Duty Punch Delgeç", "brand": "Delta", "price": 600.0, "strikePrice": 0.0, "sku": "krtsy103", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Delta Kod 111 Heavy Duty Punch Delgeç", "img": "https://static.wixstatic.com/media/899f39_92ada90439354163a033eba5dd137fab~mv2.jpg"}, {"name": "Mas 670 Koli Bantlama Makinesi", "brand": "Mas", "price": 420.0, "strikePrice": 0.0, "sku": "krtsy104", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas 670 Koli Bantlama Makinesi", "img": "https://static.wixstatic.com/media/899f39_f7ec1c4f16354c09b21381dd647d8ccd~mv2.jpg"}, {"name": "Kraf Maket Bıçağı Geniş Metal Gövdeli 630G", "brand": "KRAF", "price": 75.0, "strikePrice": 0.0, "sku": "krtsy105", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Maket Bıçağı Geniş Metal Gövdeli 630G", "img": "https://static.wixstatic.com/media/899f39_4d198645617e4351908e21732368f907~mv2.jpg"}, {"name": "Mas Pirinç Kaplı Raptiye 40'lı", "brand": "Mas", "price": 35.0, "strikePrice": 0.0, "sku": "krtsy106", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas Pirinç Kaplı Raptiye 40'lı", "img": "https://static.wixstatic.com/media/899f39_e835882f0d224a01bd507d6178fd55c8~mv2.png"}, {"name": "Tipex Rapid Sıvı Silici 20 ml", "brand": "Tipex", "price": 55.0, "strikePrice": 0.0, "sku": "krtsy107", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Tipex Rapid Sıvı Silici 20 ml", "img": "https://static.wixstatic.com/media/899f39_19674d80c8af4ed6b63b99bc9cd270c7~mv2.jpg"}, {"name": "Mas Kalemlik Metal Perforeli Silindir Siyah", "brand": "Mas", "price": 80.0, "strikePrice": 0.0, "sku": "krtsy109", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas Kalemlik Metal Perforeli Silindir Siyah", "img": "https://static.wixstatic.com/media/899f39_51b22a6ccfa9401285feea23be291f5a~mv2.jpg"}, {"name": "Brons BR-571 Silindir Hazneli Kalemtıraş", "brand": "Brons", "price": 27.5, "strikePrice": 0.0, "sku": "krtsy110", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Brons BR-571 Silindir Hazneli Kalemtıraş", "img": "https://static.wixstatic.com/media/899f39_f672a2293de84804bb9a30f630c1214b~mv2.jpg"}, {"name": "Noki büro bandı 1266 Selefon Bant 12 mm x 66 m", "brand": "Noki", "price": 275.0, "strikePrice": 0.0, "sku": "krtsy111", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Noki büro bandı 1266 Selefon Bant 12 mm x 66 m", "img": "https://static.wixstatic.com/media/899f39_eda70fc258fd4c1b80e939d511b8e2f9~mv2.jpg"}, {"name": "A4 120 Sayfa Kareli Defter Spiralli", "brand": "UniNote", "price": 80.0, "strikePrice": 0.0, "sku": "krtsy112", "category": "Defter & Ajanda", "ribbon": "", "description": "A4 120 Sayfa Kareli Defter Spiralli", "img": "https://static.wixstatic.com/media/899f39_b6e791a5305b480ab6c4601757680b75~mv2.jpg"}, {"name": "A5 defter 100 Sayfa Çizgili Üstten Spirallli", "brand": "UniNote", "price": 80.0, "strikePrice": 0.0, "sku": "krtsy113", "category": "Defter & Ajanda", "ribbon": "", "description": "A5 defter 100 Sayfa Çizgili Üstten Spirallli", "img": "https://static.wixstatic.com/media/899f39_069801c04c9249cf85cd3983c3adecfc~mv2.jpg"}, {"name": "A4 100 Sayfa Çizgili Spiralli Defter", "brand": "UniNote", "price": 85.0, "strikePrice": 0.0, "sku": "krtsy114", "category": "Defter & Ajanda", "ribbon": "", "description": "A4 100 Sayfa Çizgili Spiralli Defter", "img": "https://static.wixstatic.com/media/899f39_22fca181dd7742b6836560fdd96f2049~mv2.jpg"}, {"name": "Faber-Castell Faber Castell Fosforlu Kalem", "brand": "Faber-Castell", "price": 77.0, "strikePrice": 0.0, "sku": "krtsy115", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Faber-Castell Faber Castell Fosforlu Kalem", "img": "https://static.wixstatic.com/media/899f39_388d19709aae4868b4a141c2060a20ce~mv2.jpg"}, {"name": "Faber Castell Şeffaf Gövde Fosforlu Kalem 1546 Sarı", "brand": "Faber-Castell", "price": 77.0, "strikePrice": 0.0, "sku": "krtsy116", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Faber Castell Şeffaf Gövde Fosforlu Kalem 1546 Sarı", "img": "https://static.wixstatic.com/media/899f39_c4c70634190c4a36b5756e0a2cf83d84~mv2.jpg"}, {"name": "0.5 Rotring Uç 12'Lİ HI-POLYMER LEADS", "brand": "Rotring", "price": 50.0, "strikePrice": 0.0, "sku": "krtsy117", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "0.5 Rotring Uç 12'Lİ HI-POLYMER LEADS", "img": "https://static.wixstatic.com/media/899f39_4276bfdbb6fd4f129899c4cb5c3853e1~mv2.jpg"}, {"name": "Rotring Hi-Polymer Kurşun Kalem Ucu 0.7mm 2b", "brand": "Rotring", "price": 50.0, "strikePrice": 0.0, "sku": "krtsy118", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Rotring Hi-Polymer Kurşun Kalem Ucu 0.7mm 2b", "img": "https://static.wixstatic.com/media/899f39_78fb358a8f57464d91f7984924989114~mv2.jpg"}, {"name": "Rotring Polimer Kalem Ucu 0.5mm 2B 24lü", "brand": "Rotring", "price": 25.0, "strikePrice": 0.0, "sku": "krtsy119", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Rotring Polimer Kalem Ucu 0.5mm 2B 24lü", "img": "https://static.wixstatic.com/media/899f39_0cdd1f2497874ebab788af20b467eca8~mv2.jpg"}, {"name": "Rotring Polimer Kalem Ucu 0.7", "brand": "Rotring", "price": 25.0, "strikePrice": 0.0, "sku": "krtsy120", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Rotring Polimer Kalem Ucu 0.7", "img": "https://static.wixstatic.com/media/899f39_eb9ea0f489f940ffa33673cadde1883a~mv2.jpg"}, {"name": "Kraf Kart Kabı Şeffaf 509g 50'li", "brand": "KRAF", "price": 320.0, "strikePrice": 0.0, "sku": "krtsy121", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Kart Kabı Şeffaf 509g 50'li", "img": "https://static.wixstatic.com/media/899f39_d20127d41fca449cb99d062570943834~mv2.jpg"}, {"name": "Kraf Kart Askı Ipi Metal Klips 50'li", "brand": "KRAF", "price": 350.0, "strikePrice": 0.0, "sku": "krtsy122", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Kart Askı Ipi Metal Klips 50'li", "img": "https://static.wixstatic.com/media/899f39_563357dbc7da41d7933bc56725767bbb~mv2.jpg"}, {"name": "Kraf 5100 Plastik Magazinlik - Siyah", "brand": "KRAF", "price": 140.0, "strikePrice": 0.0, "sku": "krtsy123", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf 5100 Plastik Magazinlik - Siyah", "img": "https://static.wixstatic.com/media/899f39_121f31a3952248b0b5798e0beac96e96~mv2.jpg"}, {"name": "Kraf 570G Tahta Silgisi Mıknatıslı", "brand": "KRAF", "price": 45.0, "strikePrice": 0.0, "sku": "krtsy124", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf 570G Tahta Silgisi Mıknatıslı", "img": "https://static.wixstatic.com/media/899f39_d456ae7f270147dba578a520cbbca81b~mv2.jpg"}, {"name": "Kraf Sıkıştırmalı 5'li Dosya", "brand": "KRAF", "price": 110.0, "strikePrice": 0.0, "sku": "krtsy126", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "kraf Sıkıştırmalı 5'li Dosya", "img": "https://static.wixstatic.com/media/899f39_3db0293c1f4c435081bd52429bf02d3e~mv2.jpg"}, {"name": "Noki Sıkıştırmalı 5'li Dosya 3035", "brand": "Noki", "price": 130.0, "strikePrice": 0.0, "sku": "krtsy130", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Noki Sıkıştırmalı 5'li Dosya 3035", "img": "https://static.wixstatic.com/media/899f39_8b61202fa707449f809b4d4bc1699ef4~mv2.jpg"}, {"name": "Dilman İş Sağlığı ve İş Güvenliği Tespit Öneri Defteri Ciltli A4 50 Yaprak", "brand": "Dilman", "price": 400.0, "strikePrice": 0.0, "sku": "krtsy131", "category": "Defter & Ajanda", "ribbon": "", "description": "Dilman İş Sağlığı ve İş Güvenliği Tespit Öneri Defteri Ciltli A4 50 Yaprak", "img": "https://static.wixstatic.com/media/899f39_6a9181857ee641ccb1f6478643ddf0c0~mv2.jpg"}, {"name": "Tanex Fotoğraf Kağıdı A4  240 gr 20 Sayfa", "brand": "Tanex", "price": 185.0, "strikePrice": 0.0, "sku": "krtsy132", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Tanex Fotoğraf Kağıdı A4 240 gr 20 Sayfa", "img": "https://static.wixstatic.com/media/899f39_079d0e80ab394aa5a43d861261d1ab6d~mv2.jpg"}, {"name": "Tanex Fotoğraf Kağıdı A4 150 gr 25 sayfa", "brand": "Tanex", "price": 140.0, "strikePrice": 0.0, "sku": "krtsy133", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Tanex Fotoğraf Kağıdı A4 150 gr 25 sayfa", "img": "https://static.wixstatic.com/media/899f39_079d0e80ab394aa5a43d861261d1ab6d~mv2.jpg"}, {"name": "Tanex Fotoğraf Kağıdı A4  200 gr 20 Sayfa", "brand": "Tanex", "price": 160.0, "strikePrice": 0.0, "sku": "krtsy135", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Tanex Fotoğraf Kağıdı A4  200 gr 20 Sayfa", "img": "https://static.wixstatic.com/media/899f39_079d0e80ab394aa5a43d861261d1ab6d~mv2.jpg"}, {"name": "Tanex Fotoğraf Kağıdı A6  240 gr 50 Sayfa", "brand": "Tanex", "price": 200.0, "strikePrice": 0.0, "sku": "krtsy134", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Tanex Fotoğraf Kağıdı A6240 gr 50 Sayfa", "img": "https://static.wixstatic.com/media/899f39_5f67cc6bc1a34d58935038a3430d85ac~mv2.png"}, {"name": "Tanex Ofis Etiketi Ofc-111 Beyaz 19-23Mm 300 etiket", "brand": "Tanex", "price": 220.0, "strikePrice": 0.0, "sku": "krtsy136", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Tanex Ofis Etiketi Ofc-111 Beyaz 19-23Mm 300 etiket", "img": "https://static.wixstatic.com/media/899f39_d5e3ee60e72d4611832b00ba1b3a029d~mv2.png"}, {"name": "Mas 1266 Cubbie Omega Renkli Kıskaç Mavi 19mm 6'lı", "brand": "Mas", "price": 55.0, "strikePrice": 0.0, "sku": "krtsy139", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Mas 1266 Cubbie Omega Renkli Kıskaç Mavi 19mm 6'lı", "img": "https://static.wixstatic.com/media/899f39_4a99fbb39af24fa39bf0635d97694833~mv2.jpg"}, {"name": "Serve Double Fosforlu Kalem + Kalem Ucu 2B 0.7 mm Pembe", "brand": "Serve", "price": 100.0, "strikePrice": 0.0, "sku": "krtsy140", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Serve Double Fosforlu Kalem + Kalem Ucu 2B 0.7 mm Pembe", "img": "https://static.wixstatic.com/media/899f39_0fe6602d26114334a486748e80030871~mv2.jpg"}, {"name": "Serve Double Fosforlu Kalem + Kalem Ucu 2B 0.7 mm Sarı", "brand": "Serve", "price": 100.0, "strikePrice": 0.0, "sku": "krtsy141", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Serve Double Fosforlu Kalem + Kalem Ucu 2B 0.7 mm Sarı", "img": "https://static.wixstatic.com/media/899f39_d19506bcbe98433db268c81f0e822766~mv2.jpg"}, {"name": "Faber Castell Super Fine Kalem Ucu 0.7 mm 2B 24'lü", "brand": "Faber-Castell", "price": 32.0, "strikePrice": 0.0, "sku": "krtsy142", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Faber Castell Super Fine Kalem Ucu 0.7 mm 2B 24'lü", "img": "https://static.wixstatic.com/media/899f39_6ccfa1f0372b481dba9463ec183026dd~mv2.jpg"}, {"name": "Faber Castell Super Fine Kalem Ucu 0.5 mm 2B 24'lü", "brand": "Faber-Castell", "price": 32.0, "strikePrice": 0.0, "sku": "krtsy143", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Faber Castell Super Fine Kalem Ucu 0.5 mm 2B 24'lü", "img": "https://static.wixstatic.com/media/899f39_3dd0ea19e9f349d59aef3391bd9d3f21~mv2.jpg"}, {"name": "Kraf Zarf Hava Kabarcıklı 320x455 mm 10'lu", "brand": "KRAF", "price": 350.0, "strikePrice": 0.0, "sku": "kagıt4", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Zarf Hava Kabarcıklı 320x455 mm 10'lu", "img": "https://static.wixstatic.com/media/899f39_b0ad73bafc874ab7a32e03ef3c0dea50~mv2.jpg"}, {"name": "Oyal Zarf Diplomat 10.5x24 90gr Beyaz Penceresiz Slk 500lü Zarflar OYAL", "brand": "Oyal", "price": 675.0, "strikePrice": 0.0, "sku": "kagıt3", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Oyal Zarf Diplomat 10.5x24 90gr Beyaz Penceresiz Slk 500lü Zarflar OYAL", "img": "https://static.wixstatic.com/media/899f39_e55370b974234a37ba2d711b668d1954~mv2.jpg"}, {"name": "Adisyon Fişi 100 Yaprak", "brand": "", "price": 35.0, "strikePrice": 0.0, "sku": "kagıt5", "category": "Termal & POS Rulo", "ribbon": "", "description": "Adisyon Fişi 100 Yaprak", "img": "https://static.wixstatic.com/media/899f39_f01c425a96ea4874b313628becab5624~mv2.jpg"}, {"name": "Dilman Para Makbuzu Otokopili 2/50 2 Nüsha", "brand": "Dilman", "price": 50.0, "strikePrice": 0.0, "sku": "kagıt6", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Dilman Para Makbuzu Otokopili 2/50 2 Nüsha", "img": "https://static.wixstatic.com/media/899f39_9b83a37b91f54d8392741a5d0f3b29ea~mv2.jpg"}, {"name": "Pereja Limon Kolonyası 1 Lt Pompalı ", "brand": "Pereja", "price": 250.0, "strikePrice": 0.0, "sku": "per1", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja Limon Kolonyası 1 Lt Pompalı", "img": "https://static.wixstatic.com/media/899f39_98bea2fb6d094edd9b901f64aa2dba74~mv2.jpg"}, {"name": "Pereja Limon Kolonyası 5 Lt Bidon", "brand": "Pereja", "price": 1100.0, "strikePrice": 0.0, "sku": "per2", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja Limon Kolonyası 5 Lt Bidon", "img": "https://static.wixstatic.com/media/899f39_ccdcb4de668a49e588749da2c90d5841~mv2.jpg"}, {"name": "Pereja Limon Kolonyası 200 ml Pet Şişe", "brand": "Pereja", "price": 90.0, "strikePrice": 0.0, "sku": "per3", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja Limon Kolonyası 200 ml Pet Şişe", "img": "https://static.wixstatic.com/media/899f39_bf99256b69004cb0a892a195568102ea~mv2.jpg"}, {"name": "Pereja Limon Kolonyası 400 ml Pet Şişe", "brand": "Pereja", "price": 140.0, "strikePrice": 0.0, "sku": "per4", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja Limon Kolonyası 400 ml Pet Şişe", "img": "https://static.wixstatic.com/media/899f39_5b431e28b9b0438094d6b4f1a44e50c1~mv2.jpg"}, {"name": "Pereja Elegans Kolonyası 100 ml Pet Şişe", "brand": "Pereja", "price": 80.0, "strikePrice": 0.0, "sku": "per5", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja Elegans Kolonyası 100 ml Pet Şişe", "img": "https://static.wixstatic.com/media/899f39_aefca90e60c94a16aa219f1fcc2622bb~mv2.jpg"}, {"name": "Pereja kaşmir Kolonyası 100 ml Pet Şişe", "brand": "Pereja", "price": 80.0, "strikePrice": 0.0, "sku": "per6", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja kaşmir Kolonyası 100 ml Pet Şişe", "img": "https://static.wixstatic.com/media/899f39_2991ec1e097348fca44e87fd5c896669~mv2.jpg"}, {"name": "Pereja Portakal Çiçeği Kolonyası 50 ml Pet Şişe", "brand": "Pereja", "price": 50.0, "strikePrice": 0.0, "sku": "per7", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja Portakal Çiçeği Kolonyası 50 ml Pet Şişe", "img": "https://static.wixstatic.com/media/899f39_f4548481d6aa48b8bfc5b1b6b211326f~mv2.jpg"}, {"name": "Pereja Yasemin Kolonyası 50 ml Pet Şişe", "brand": "Pereja", "price": 50.0, "strikePrice": 0.0, "sku": "per8", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja Yasemin Kolonyası 50 ml Pet Şişe", "img": "https://static.wixstatic.com/media/899f39_5b32ff77e41c4e308736a4d8c9c576ae~mv2.jpg"}, {"name": "Pereja Kaşmir Doğal Zeytinyağlı Sıvı Sabun 500 ml", "brand": "Pereja", "price": 125.0, "strikePrice": 0.0, "sku": "per8_2", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja Kaşmir Doğal Zeytinyağlı Sıvı Sabun 500 ml", "img": "https://static.wixstatic.com/media/899f39_e0c75ec292ab442a93cb27feae522b23~mv2.jpg"}, {"name": "Pereja Pudra Doğal Zeytinyağlı Sıvı Sabun 500 ml", "brand": "Pereja", "price": 125.0, "strikePrice": 0.0, "sku": "per9", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja Pudra Doğal Zeytinyağlı Sıvı Sabun 500 ml", "img": "https://static.wixstatic.com/media/899f39_f0df9cb9e6dd432d8016e8e7904a2726~mv2.jpg"}, {"name": "Pereja Yasemin Doğal Zeytinyağlı Sıvı Sabun 500 ml ", "brand": "Pereja", "price": 125.0, "strikePrice": 0.0, "sku": "per10", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja Yasemin Doğal Zeytinyağlı Sıvı Sabun 500 ml", "img": "https://static.wixstatic.com/media/899f39_d5f091be45c940c6bad53c892ad0c815~mv2.jpg"}, {"name": "Pereja Gizemli Misk Doğal Zeytinyağlı Sıvı Sabun 500 ml", "brand": "Pereja", "price": 125.0, "strikePrice": 0.0, "sku": "per11", "category": "Temizlik & Hijyen", "ribbon": "", "description": "Pereja Gizemli Misk Doğal Zeytinyağlı Sıvı Sabun 500 ml", "img": "https://static.wixstatic.com/media/899f39_6eaab372d34046b7ab26801124b7573e~mv2.jpg"}, {"name": "Epson Orjinal 103 Mürekkep Seti 4 RENK", "brand": "Epson", "price": 1950.0, "strikePrice": 0.0, "sku": "toner20", "category": "Toner & Kartuş", "ribbon": "", "description": "Epson Orjinal 103 Mürekkep Seti 4 renk", "img": "https://static.wixstatic.com/media/899f39_508e7eb4e0f04585b37fe90a06596790~mv2.png"}, {"name": "EPSON 103 Orijinal Kırmızı Mürekkep", "brand": "Epson", "price": 490.0, "strikePrice": 0.0, "sku": "toner21", "category": "Toner & Kartuş", "ribbon": "", "description": "EPSON 103 Orijinal Kırmızı Mürekkep", "img": "https://static.wixstatic.com/media/899f39_bb17dff5b0c4451c9e6e71a257f551e6~mv2.jpg"}, {"name": "Epson 103 Orijinal Siyah Mürekkep", "brand": "Epson", "price": 490.0, "strikePrice": 0.0, "sku": "toner22", "category": "Toner & Kartuş", "ribbon": "", "description": "Epson 103 Orijinal Siyah Mürekkep", "img": "https://static.wixstatic.com/media/899f39_2165d02bc9fa4dcbb7bce6c4418b4477~mv2.jpg"}, {"name": "Epson 103 Orijinal Mavi Mürekkep", "brand": "Epson", "price": 490.0, "strikePrice": 0.0, "sku": "toner23", "category": "Toner & Kartuş", "ribbon": "", "description": "Epson 103 Orijinal Mavi Mürekkep", "img": "https://static.wixstatic.com/media/899f39_00f016d6051b4887b93b96ea15022a4f~mv2.jpg"}, {"name": "EPSON 103 Orijinal Sarı Mürekkep", "brand": "Epson", "price": 490.0, "strikePrice": 0.0, "sku": "toner25", "category": "Toner & Kartuş", "ribbon": "", "description": "EPSON 103 Orijinal Sarı Mürekkep", "img": "https://static.wixstatic.com/media/899f39_cd6e677b0a5b425aa190f049efe05a31~mv2.jpg"}, {"name": "Epson 103 İthal Mürekkep 4 Renk Set", "brand": "Epson", "price": 500.0, "strikePrice": 0.0, "sku": "toner26", "category": "Toner & Kartuş", "ribbon": "", "description": "Epson 103 İthal Mürekkep 4 Renk Set", "img": "https://static.wixstatic.com/media/899f39_d1926ef260304a65a51974c3ead4face~mv2.jpg"}, {"name": "Siyah Poşet Küçük Boy 1 KG", "brand": "", "price": 190.0, "strikePrice": 0.0, "sku": "Ambalaj1", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Siyah Poşet Küçük Boy 1 KG", "img": "https://static.wixstatic.com/media/899f39_a4d3fe2a436b47898521d4c846ca12b4~mv2.jpg"}, {"name": "Siyah Poşet Mini Boy 1 KG", "brand": "", "price": 190.0, "strikePrice": 0.0, "sku": "Ambalaj2", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Siyah Poşet Mini Boy 1 KG", "img": "https://static.wixstatic.com/media/899f39_44f712b00b6d405aaa390a2c7cf9ca1e~mv2.jpg"}, {"name": "Siyah Poşet Orta Boy 1 KG", "brand": "", "price": 190.0, "strikePrice": 0.0, "sku": "ambalaj3", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Siyah Poşet Orta Boy 1 KG", "img": "https://static.wixstatic.com/media/899f39_f41032a15882447a9e73fc0b77a028e1~mv2.jpg"}, {"name": "Siyah Poşet Büyük Boy 1 KG", "brand": "", "price": 190.0, "strikePrice": 0.0, "sku": "Ambalaj4", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Siyah Poşet Büyük Boy 1 KG", "img": "https://static.wixstatic.com/media/899f39_8689a830d86444dc8451c202a6b2d7cb~mv2.jpg"}, {"name": "Beyaz Poşet Mini Boy 1 KG", "brand": "", "price": 190.0, "strikePrice": 0.0, "sku": "ambalaj5", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Beyaz Poşet Mini Boy 1 KG", "img": "https://static.wixstatic.com/media/899f39_a02264f11189461a80ce923d0f5e551b~mv2.jpg"}, {"name": "Beyaz Poşet Küçük Boy 1 KG", "brand": "", "price": 190.0, "strikePrice": 0.0, "sku": "ambalaj6", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Beyaz Poşet Küçük Boy 1 KG", "img": "https://static.wixstatic.com/media/899f39_1295c6470c5341f599fbea033d2050b3~mv2.jpg"}, {"name": "Beyaz Poşet Orta Boy 1 KG", "brand": "", "price": 190.0, "strikePrice": 0.0, "sku": "ambalaj7", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Beyaz Poşet Orta Boy 1 KG", "img": "https://static.wixstatic.com/media/899f39_ccb465a031c84f1ab62c12b1ff7979ac~mv2.jpg"}, {"name": "Beyaz Poşet Büyük Boy 1 KG", "brand": "", "price": 190.0, "strikePrice": 0.0, "sku": "ambalaj8", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Beyaz Poşet Büyük Boy 1 KG", "img": "https://static.wixstatic.com/media/899f39_6338f6922466424db16a637398b6abe8~mv2.jpg"}, {"name": "Ethex Endüstriyel Büyük Boy Çöp Torbası 20 Rulo", "brand": "Ethex", "price": 375.0, "strikePrice": 0.0, "sku": "ambalaj9", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Ethex Endüstriyel Büyük Boy Çöp Torbası 20 Rulo", "img": "https://static.wixstatic.com/media/899f39_1a3cd643b30549cc9be5f2404b7690ff~mv2.jpg"}, {"name": "Ethex Endüstriyel Orta Boy Çöp Torbası 20 Rulo", "brand": "Ethex", "price": 375.0, "strikePrice": 0.0, "sku": "ambalaj10", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Ethex Endüstriyel Orta Boy Çöp Torbası 20 Rulo", "img": "https://static.wixstatic.com/media/899f39_b8cb249c7dc340228a5ab14b75c2c76a~mv2.jpg"}, {"name": "Klas Rock Tape 45x100 Şeffaf Koli Bandı Hotmelt", "brand": "KLAS", "price": 60.0, "strikePrice": 0.0, "sku": "ambalaj11", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Klas Rock Tape 45x100 Şeffaf Koli Bandı Hotmelt Kalite Hotmelt yapışkanlı üründür.", "img": "https://static.wixstatic.com/media/899f39_37f443664e24492e8a6dbfaf6b9cc64c~mv2.jpg"}, {"name": "Ve-Ge 45 x 40 cm Koli Bandı Fil Şeffaf Gergedan", "brand": "Vege", "price": 30.0, "strikePrice": 0.0, "sku": "ambalaj12", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Ve-Ge 45 x 40 cm Koli Bandı Fil Şeffaf Gergedan", "img": "https://static.wixstatic.com/media/899f39_aa4a949dad234caa8d2ce112b06ed80e~mv2.png"}, {"name": "17 Mikron Streç Film Şeffaf 50 cm x 200 mt 2 kg 6 LI KOLİ", "brand": "Flood", "price": 1590.0, "strikePrice": 0.0, "sku": "ambalaj13", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "17 Mikron Streç Film Şeffaf 50 cm x 200 mt 2 kg 6 LI KOLİ", "img": "https://static.wixstatic.com/media/899f39_408277f337ea423da6193755d6862b45~mv2.jpg"}, {"name": "Rulo Şeffaf Poşet Küçük", "brand": "", "price": 90.0, "strikePrice": 0.0, "sku": "ambalaj14", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Rulo Şeffaf Poşet Küçük", "img": "https://static.wixstatic.com/media/899f39_697a5209e6df48e08d0387909b124d0c~mv2.png"}, {"name": "Rulo Şeffaf Poşet Orta", "brand": "", "price": 90.0, "strikePrice": 0.0, "sku": "ambalaj16", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Rulo Şeffaf Poşet Orta", "img": "https://static.wixstatic.com/media/899f39_8ae9e838f1c44d1ebfd0b739540cf5b7~mv2.png"}, {"name": "Rulo Şeffaf Poşet Büyük", "brand": "", "price": 90.0, "strikePrice": 0.0, "sku": "ambalaj15", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Rulo Şeffaf Poşet Büyük", "img": "https://static.wixstatic.com/media/899f39_7aa58cb2e9954e5b86f058c8d99298de~mv2.png"}, {"name": "Plastik Şeffaf Çatal 100'Lü", "brand": "", "price": 50.0, "strikePrice": 0.0, "sku": "ambalaj18", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Plastik Şeffaf Çatal 100'Lü", "img": "https://static.wixstatic.com/media/899f39_5b470d40124e481ebb63a3d722d5e3b8~mv2.jpg"}, {"name": "Plastik Şeffaf Kaşık 100'Lü", "brand": "", "price": 50.0, "strikePrice": 0.0, "sku": "ambalaj19", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Plastik Şeffaf Kaşık 100'Lü", "img": "https://static.wixstatic.com/media/899f39_0f5a0f5d244f4114af1a6d9cd53ed8da~mv2.png"}, {"name": "Ahşap Karıştırıcı 500'lü ", "brand": "", "price": 50.0, "strikePrice": 0.0, "sku": "ambalaj20", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Ahşap Karıştırıcı 500'lü", "img": "https://static.wixstatic.com/media/899f39_4afb9229cdc74f7fb93747d083b050f3~mv2.jpg"}, {"name": "Poşetli Pipet 50 'li", "brand": "", "price": 55.0, "strikePrice": 0.0, "sku": "ambalaj21", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Poşetli Pipet 50 'li", "img": "https://static.wixstatic.com/media/899f39_bc536e732a2e409b8209ccccd1cf114b~mv2.jpg"}, {"name": "Tek Kullanımlık Şeffaf Eldiven 100 adet", "brand": "", "price": 40.0, "strikePrice": 0.0, "sku": "ambalaj22", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Tek Kullanımlık Şeffaf Eldiven 100 adet", "img": "https://static.wixstatic.com/media/899f39_4c0e30c463cf46348d4d1c4ee54fca1f~mv2.jpg"}, {"name": "4 Oz Karton Bardak 2000'li", "brand": "Bencup", "price": 1395.0, "strikePrice": 0.0, "sku": "ambalaj23", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "4 Oz Karton Bardak 2000'li", "img": "https://static.wixstatic.com/media/899f39_827c49fbd10f4efe8388f3118f04ab28~mv2.jpeg"}, {"name": "Bencup Karton Bardak Ekstra Kalite 7 OZ 3000'Lİ ", "brand": "Bencup", "price": 1950.0, "strikePrice": 0.0, "sku": "ambalaj24", "category": "Ambalaj Malzemeleri", "ribbon": "", "description": "Bencup Karton Bardak Ekstra Kalite 7 OZ 3000'Lİ", "img": "https://static.wixstatic.com/media/899f39_0e94231d93ed4a5c918c0a11ce16ac10~mv2.png"}, {"name": "Dilman Tahsilat Makbuzu Otokopili 2/50 2 Nüsha", "brand": "Dilman", "price": 50.0, "strikePrice": 0.0, "sku": "kagıt10", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Dilman Tahsilat Makbuzu Otokopili 2/50 2 Nüsha", "img": "https://static.wixstatic.com/media/899f39_9c17b8add1cd440f83411ebf3131515a~mv2.jpg"}, {"name": "Lenovo B210 GX40Q17227 Gri 15.6\" Laptop Sırt Çantası", "brand": "Lenova", "price": 475.0, "strikePrice": 550.0, "sku": "fırsat1", "category": "Elektronik", "ribbon": "", "description": "Lenovo B210 GX40Q17227 Gri 15.6\" Laptop Sırt Çantası", "img": "https://static.wixstatic.com/media/899f39_9220679467ad4bca8570d2c0da5f2e0b~mv2.jpg"}, {"name": "S-Link SL-U2015 Usb2.0 1.5m Şeffaf Yazıcı Kablosu", "brand": "S-Link", "price": 125.0, "strikePrice": 0.0, "sku": "tekno1", "category": "Yazıcı & Fotokopi", "ribbon": "", "description": "S-Link SL-U2015 Usb2.0 1.5m Şeffaf Yazıcı Kablosu", "img": "https://static.wixstatic.com/media/899f39_311a4149594b4cf0aa86fbba25b33128~mv2.jpg"}, {"name": "S-Link Sl-P175 1.5M 0.75Mm Lüks Power Kablo", "brand": "S-Link", "price": 125.0, "strikePrice": 0.0, "sku": "tekno2", "category": "Yazıcı & Fotokopi", "ribbon": "", "description": "S-Link Sl-P175 1.5M 0.75Mm Lüks Power Kablo", "img": "https://static.wixstatic.com/media/899f39_73c398dcdaf4432f99a773b0d263074d~mv2.png"}, {"name": "Teyp , Yazıcı Fişi - Notebook Adaptör Power Kablosu 2 Pin - 1.5 Metre", "brand": "", "price": 125.0, "strikePrice": 0.0, "sku": "tekno3", "category": "Yazıcı & Fotokopi", "ribbon": "", "description": "Yazıcı Fişi - Notebook Adaptör Power Kablosu 2 Pin - 1.5 Metre", "img": "https://static.wixstatic.com/media/899f39_135b8d8060754e48a8235d7ff7250510~mv2.jpg"}, {"name": "Dark DK-AC-BTU53 5.3 Bluetooth Adaptör", "brand": "Dark", "price": 390.0, "strikePrice": 0.0, "sku": "tekno4", "category": "Elektronik", "ribbon": "", "description": "Dark DK-AC-BTU53 5.3 Bluetooth Adaptör", "img": "https://static.wixstatic.com/media/899f39_4f5c743ae3cf45f5a9a091d47b8dd993~mv2.png"}, {"name": "Dark ErgoPAD Klavye ve Mouse Uyumlu Bilek Destekli Mousepad", "brand": "Dark", "price": 1075.0, "strikePrice": 0.0, "sku": "tekno5", "category": "Elektronik", "ribbon": "", "description": "Dark ErgoPAD Klavye ve Mouse Uyumlu Bilek Destekli Mousepad", "img": "https://static.wixstatic.com/media/899f39_558723d6524c4c8894d7fbf6f99737fb~mv2.png"}, {"name": "Addison 300152 Siyah Bileklikli Jel Mouse Pad", "brand": "Addison", "price": 200.0, "strikePrice": 0.0, "sku": "tekno7", "category": "Elektronik", "ribbon": "", "description": "Addison 300152 Siyah Bileklikli Jel Mouse Pad", "img": "https://static.wixstatic.com/media/899f39_686823ae94104ab7bf88449ead21eca6~mv2.png"}, {"name": "Lenovo Legion Oyuncu Mouse Pad", "brand": "Lenova", "price": 290.0, "strikePrice": 0.0, "sku": "tekno11", "category": "Elektronik", "ribbon": "", "description": "Lenovo Legion Oyuncu Mouse Pad", "img": "https://static.wixstatic.com/media/899f39_9612771f6fd24bb0a816d7e5bd734272~mv2.jpg"}, {"name": "Trust 20429 Bigfoot Mousepad", "brand": "Trust", "price": 350.0, "strikePrice": 0.0, "sku": "tekno8", "category": "Elektronik", "ribbon": "", "description": "Trust 20429 Bigfoot Mousepad", "img": "https://static.wixstatic.com/media/899f39_af3f42348833475e9dbcf7749e73e275~mv2.jpg"}, {"name": "Everest SM-BT29 Glassy Mavi Transparan Şeffaf Kablosuz Mouse", "brand": "Everest", "price": 300.0, "strikePrice": 0.0, "sku": "tekno9", "category": "Elektronik", "ribbon": "", "description": "Everest SM-BT29 Glassy Mavi Transparan Şeffaf Kablosuz Mouse", "img": "https://static.wixstatic.com/media/899f39_317802f704574351b9fabe5d200ffae9~mv2.jpg"}, {"name": "Everest SM-BT29 Glassy Turuncu Transparan Şeffaf Kablosuz Mouse", "brand": "Everest", "price": 300.0, "strikePrice": 0.0, "sku": "tekno10", "category": "Elektronik", "ribbon": "", "description": "Everest SM-BT29 Glassy Turuncu Transparan Şeffaf Kablosuz Mouse", "img": "https://static.wixstatic.com/media/899f39_4b97d3a34caf417eacee0bf54220e68e~mv2.jpg"}, {"name": "Havit MS93RF Kablosuz Mouse - Ergonomik Tasarım - Beyaz", "brand": "Havit", "price": 300.0, "strikePrice": 0.0, "sku": "tekno12", "category": "Elektronik", "ribbon": "", "description": "Havit MS93RF Kablosuz Mouse - Ergonomik Tasarım - Beyaz", "img": "https://static.wixstatic.com/media/899f39_1024b69f8cca4f7abff2ab4f880b5e9f~mv2.jpg"}, {"name": "Almera 3'lü 3MT Topraklı Priz", "brand": "Almera", "price": 240.0, "strikePrice": 0.0, "sku": "tekno13", "category": "Elektronik", "ribbon": "", "description": "Almera 3'lü 3MT Topraklı Priz", "img": "https://static.wixstatic.com/media/899f39_c8cf3139c1b34333a057d3f220027a96~mv2.jpg"}, {"name": "Everest SMW-666 Siyah Usb 2.4GHZ Optik Wireless Mouse 1500DPİ", "brand": "Everest", "price": 290.0, "strikePrice": 0.0, "sku": "tekno14", "category": "Elektronik", "ribbon": "", "description": "Everest SMW-666 Siyah Usb 2.4GHZ Optik Wireless Mouse 1500DPİ", "img": "https://static.wixstatic.com/media/899f39_bfad5bdd100249abad2ec69506e0bd90~mv2.jpg"}, {"name": "Everest SMW-666 Beyaz Usb 2.4GHZ Optik Wireless Mouse 1500DPİ", "brand": "Everest", "price": 290.0, "strikePrice": 0.0, "sku": "tekno15", "category": "Elektronik", "ribbon": "", "description": "Everest SMW-666 Beyaz Usb 2.4GHZ Optik Wireless Mouse 1500DPİ", "img": "https://static.wixstatic.com/media/899f39_f98c8ac88ada4383ae369840d55d3544~mv2.jpg"}, {"name": "HP CS10L Kablosuz Klavye + Mouse Set", "brand": "HP", "price": 700.0, "strikePrice": 0.0, "sku": "tekno16", "category": "Elektronik", "ribbon": "", "description": "HP CS10L Kablosuz Klavye + Mouse Set", "img": "https://static.wixstatic.com/media/899f39_f4513faad36444b3bea3906a195b8178~mv2.jpg"}, {"name": "Acer OKR220 Siyah MultiDevice Dual Mode 2.4GHZ Bluetooth Klavye", "brand": "Acer", "price": 590.0, "strikePrice": 0.0, "sku": "tekno17", "category": "Elektronik", "ribbon": "", "description": "Acer OKR220 Siyah MultiDevice Dual Mode 2.4GHZ Bluetooth Klavye", "img": "https://static.wixstatic.com/media/899f39_22b2b547d976492eb72d38f1aa7cfc0e~mv2.jpg"}, {"name": "Copier Bond (Ve-Ge) A3 80GR Fotokopi Kağıdı 2500 Adet Kağıt", "brand": "Vege", "price": 2250.0, "strikePrice": 2344.0, "sku": "kagıt11", "category": "Yazıcı & Fotokopi", "ribbon": "", "description": "Copier Bond (Ve-Ge) A3 80GR Fotokopi Kağıdı 2500 Adet Kağıt", "img": "https://static.wixstatic.com/media/899f39_cca019c5b1ff47ce9a9dfe1d89febd1c~mv2.jpg"}, {"name": "Philips SPK7327WS Beyaz Kablosuz Sessiz Optik Mouse", "brand": "Philips", "price": 400.0, "strikePrice": 0.0, "sku": "tekno17_2", "category": "Elektronik", "ribbon": "", "description": "Philips SPK7327WS Beyaz Kablosuz Sessiz Optik Mouse", "img": "https://static.wixstatic.com/media/899f39_5b0cf0c1b0d44bb5bade71f444c5a3fc~mv2.jpg"}, {"name": "Philips SPK7327/93 Black and Gold Kablosuz Sessiz Optik Mouse", "brand": "Philips", "price": 400.0, "strikePrice": 0.0, "sku": "tekno18", "category": "Elektronik", "ribbon": "", "description": "Philips SPK7327/93 Black and Gold Kablosuz Sessiz Optik Mouse", "img": "https://static.wixstatic.com/media/899f39_cf3bd9af0e2f4644b3d4a9def36eeb41~mv2.png"}, {"name": "Philips SPK7327HS/93 Black and Red Kablosuz Sessiz Optik Mouse", "brand": "Philips", "price": 400.0, "strikePrice": 0.0, "sku": "tekno19", "category": "Elektronik", "ribbon": "", "description": "Philips SPK7327HS/93 Black and Red Kablosuz Sessiz Optik Mouse", "img": "https://static.wixstatic.com/media/899f39_2b749dd1676b4edbb4fad11c5de7a98a~mv2.jpg"}, {"name": "Kraf Sekreterlik A4 Kapaklı 1045 Siyah", "brand": "KRAF", "price": 95.0, "strikePrice": 0.0, "sku": "krtsy151", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Sekreterlik A4 Kapaklı 1045 Siyah", "img": "https://static.wixstatic.com/media/899f39_754b3749ff4d496ca7d74e5a82ed61c5~mv2.jpg"}, {"name": "Kraf Sekreterlik A4 Kapaklı 1045 Kırmızı", "brand": "KRAF", "price": 95.0, "strikePrice": 0.0, "sku": "krtsy152", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Sekreterlik A4 Kapaklı 1045 Kırmızı", "img": "https://static.wixstatic.com/media/899f39_1c0f3285b8684d70b373922237c3f684~mv2.png"}, {"name": "Kraf Sekreterlik A4 Kapaklı 1045 Mavi", "brand": "KRAF", "price": 95.0, "strikePrice": 0.0, "sku": "krtsy153", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Sekreterlik A4 Kapaklı 1045 Mavi", "img": "https://static.wixstatic.com/media/899f39_adfe4a18b7ec406d8ab5d7af42d1b2a1~mv2.jpg"}, {"name": "Kraf Sekreterlik A4 Kapaksız 1040 Siyah", "brand": "KRAF", "price": 85.0, "strikePrice": 0.0, "sku": "krtsy154", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Sekreterlik A4 Kapaksız 1040 Siyah", "img": "https://static.wixstatic.com/media/899f39_e6b70d14566140f6b09150501e01a776~mv2.jpg"}, {"name": "Kraf Sekreterlik A4 Kapaksız 1040 Mavi", "brand": "KRAF", "price": 85.0, "strikePrice": 0.0, "sku": "krtsy156", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Sekreterlik A4 Kapaksız 1040 Mavi", "img": "https://static.wixstatic.com/media/899f39_3b0f818d2ddf494e948906859e4bdfa4~mv2.jpg"}, {"name": "Kraf Sekreterlik A4 Kapaksız 1040 Kırmızı", "brand": "KRAF", "price": 85.0, "strikePrice": 0.0, "sku": "krtsy158", "category": "Ofis ve Kırtasiye", "ribbon": "", "description": "Kraf Sekreterlik A4 Kapaksız 1040 Kırmızı", "img": "https://static.wixstatic.com/media/899f39_05adc94cc4d74c098c126cb713fd5f16~mv2.jpg"}, {"name": "KYOCERA TK-350 İTHAL TONER", "brand": "Kyocera", "price": 450.0, "strikePrice": 0.0, "sku": "toner100", "category": "Toner & Kartuş", "ribbon": "", "description": "KYOCERA TK-350 İTHAL TONER", "img": "https://static.wixstatic.com/media/899f39_c556a9d6a0d14ced854fa65309349f16~mv2.jpg"}, {"name": "Utax DC-6130 CD-5130 iTHAL Toner CD-5230 DC-2630 P3020 P3025", "brand": "Utax", "price": 590.0, "strikePrice": 0.0, "sku": "toner103", "category": "Toner & Kartuş", "ribbon": "", "description": "Utax DC-6130 CD-5130 iTHAL Toner CD-5230 DC-2630 P3020 P3025", "img": "https://static.wixstatic.com/media/899f39_5df31ced84d947a5bf3712268962a154~mv2.jpg"}, {"name": "Brother BTD60BK + CMY Muadil Mürekkep Seti", "brand": "Brother", "price": 300.0, "strikePrice": 0.0, "sku": "toner105", "category": "Toner & Kartuş", "ribbon": "", "description": "Brother BTD60BK + CMY Muadil Mürekkep Seti", "img": "https://static.wixstatic.com/media/899f39_c8199a2b38c3441380a4763f66327079~mv2.jpg"}, {"name": "Epson 112 Ecotank Muadil Mürekkep Seti L6580 L15180 L6570", "brand": "Epson", "price": 350.0, "strikePrice": 0.0, "sku": "toner107", "category": "Toner & Kartuş", "ribbon": "", "description": "Epson 112 Ecotank Muadil Mürekkep Seti L6580 L15180 L6570", "img": "https://static.wixstatic.com/media/899f39_ceb3c31142c04aaaa94742ae95d2261c~mv2.jpg"}, {"name": "Canon GI-490 Pixma G4411 Muadil Mürekkep Seti Bk-C-Y-M", "brand": "Canon", "price": 350.0, "strikePrice": 0.0, "sku": "toner110", "category": "Toner & Kartuş", "ribbon": "", "description": "Canon GI-490 Pixma G4411 Muadil Mürekkep Seti Bk-C-Y-M", "img": "https://static.wixstatic.com/media/899f39_cc236565e9dd4c85b582482c3c073afd~mv2.jpg"}, {"name": "Canon G Serisi MC-G04 Uyumlu Atık Mürekkep Tankı - Bakım Kutusu", "brand": "Canon", "price": 425.0, "strikePrice": 0.0, "sku": "toner109", "category": "Toner & Kartuş", "ribbon": "", "description": "Canon G Serisi MC-G04 Uyumlu Atık Mürekkep Tankı - Bakım Kutusu", "img": "https://static.wixstatic.com/media/899f39_b7878a8fdf9a4e1997317809379a8dbb~mv2.jpg"}, {"name": "Epson T04D1-C13T04D100 Muadil Atık Kutusu Epson Ecotank", "brand": "Epson", "price": 350.0, "strikePrice": 0.0, "sku": "toner111", "category": "Toner & Kartuş", "ribbon": "", "description": "L6160, L6170, L6190, L6260, L6270, L6290, L6460, L6490, L14150, M1170, M2170, M3170 yazıcılar ile uyumlu.", "img": "https://static.wixstatic.com/media/899f39_4dfa66bf146247fe829338a175d65492~mv2.jpg"}, {"name": "Canon MC-G02 Çipli Muadil Atık Kutusu - G3420/G3460/G3520/G3560", "brand": "Canon", "price": 425.0, "strikePrice": 0.0, "sku": "yedek1", "category": "Toner & Kartuş", "ribbon": "", "description": "Canon MC-G02 (MCG02) Çipli Muadil Atık Kutusu Canon Pixma G3420/G3460/G3520/G3560 Yazıcılarla Uyumlu", "img": "https://static.wixstatic.com/media/899f39_4468e27cd05f406da9cacd025965b95e~mv2.jpg"}, {"name": "Brother TN-1040 İthal Toner 1.6k", "brand": "Brother", "price": 290.0, "strikePrice": 0.0, "sku": "toner113", "category": "Toner & Kartuş", "ribbon": "", "description": "Brother TN-1040 İthal Toner 1.6k", "img": "https://static.wixstatic.com/media/899f39_214fd7efe97e4055a98e519a33a84059~mv2.jpg"}, {"name": "Brother TN-261K Siyah Muadil Toner 2.5k", "brand": "Brother", "price": 390.0, "strikePrice": 0.0, "sku": "toner114", "category": "Toner & Kartuş", "ribbon": "", "description": "Brother TN-261K Siyah Muadil Toner 2.5k", "img": "https://static.wixstatic.com/media/899f39_45f37e65221e42808d7bf2b02f9dcdff~mv2.jpg"}, {"name": "BROTHER TN-265M Magenta Yüksek Kapasite (2.2K)", "brand": "Brother", "price": 400.0, "strikePrice": 0.0, "sku": "toner115", "category": "Toner & Kartuş", "ribbon": "", "description": "BROTHER TN-265M (261XL) Magenta Yüksek Kapasite (2.2K)", "img": "https://static.wixstatic.com/media/899f39_b170a8ed66494d7da7ab7b1c98da4bec~mv2.jpg"}, {"name": "BROTHER TN-265C Cyan Yüksek Kapasite (2.2K)", "brand": "Brother", "price": 400.0, "strikePrice": 0.0, "sku": "toner116", "category": "Toner & Kartuş", "ribbon": "", "description": "BROTHER TN-265C (261XL) Cyan Yüksek Kapasite (2.2K)", "img": "https://static.wixstatic.com/media/899f39_a96748b82f2a4a5c9e69fbd1f9a7c9dd~mv2.jpg"}, {"name": "BROTHER TN-265Y Yellow Yüksek Kapasite (2.2K)", "brand": "Brother", "price": 400.0, "strikePrice": 0.0, "sku": "toner119", "category": "Toner & Kartuş", "ribbon": "", "description": "BROTHER TN-265Y (261XL) Yellow Yüksek Kapasite (2.2K)", "img": "https://static.wixstatic.com/media/899f39_414abd2c178e4adca6a35ec33972787d~mv2.jpg"}, {"name": "Samsung MLT-D101S Muadil Toner 1.5k", "brand": "Samsung", "price": 390.0, "strikePrice": 0.0, "sku": "toner120", "category": "Toner & Kartuş", "ribbon": "", "description": "Samsung MLT-D101S Muadil Toner 1.5k", "img": "https://static.wixstatic.com/media/899f39_14d348509e6143e3943445f4bd8049f8~mv2.jpg"}, {"name": "SAMSUNG MLT D119 Muadil Toner ML-1610 3k", "brand": "Samsung", "price": 490.0, "strikePrice": 0.0, "sku": "toner121", "category": "Toner & Kartuş", "ribbon": "", "description": "SAMSUNG MLT D119 Muadil Toner ML-1610 3k", "img": "https://static.wixstatic.com/media/899f39_6ad99f11a0874f788e9842a87bda5699~mv2.jpg"}, {"name": "Samsung MLT-D111L Yüksek Kapasiteli 1.8k", "brand": "Samsung", "price": 425.0, "strikePrice": 0.0, "sku": "toner130", "category": "Toner & Kartuş", "ribbon": "", "description": "Samsung MLT-D111L Yüksek Kapasiteli 1.8k", "img": "https://static.wixstatic.com/media/899f39_259007dfb417421496a58163ad3cc682~mv2.jpg"}, {"name": "Samsung Mlt-D204e İthal Toner Yüksek Kapasite (10K)", "brand": "Samsung", "price": 700.0, "strikePrice": 0.0, "sku": "toner126", "category": "Toner & Kartuş", "ribbon": "", "description": "Samsung Mlt-D204e İthal Toner Yüksek Kapasite (10K)", "img": "https://static.wixstatic.com/media/899f39_77d96f4edce54d0b94a11cb34466a284~mv2.jpg"}, {"name": "Samsung Mlt-D116L İthal Toner Yüksek Kapasite (3K)", "brand": "Samsung", "price": 390.0, "strikePrice": 0.0, "sku": "toner130_2", "category": "Toner & Kartuş", "ribbon": "", "description": "Samsung Mlt-D116L İthal Toner Yüksek Kapasite (3K)", "img": "https://static.wixstatic.com/media/899f39_b8c4251124df43ee961b6a427d755033~mv2.jpg"}, {"name": "SAMSUNG MLT-D104S Muadil Toner (1.5K)", "brand": "Samsung", "price": 520.0, "strikePrice": 0.0, "sku": "toner132", "category": "Toner & Kartuş", "ribbon": "", "description": "SAMSUNG MLT-D104S SİYAH/BLACK MUADİL TONER (1.5K)", "img": "https://static.wixstatic.com/media/899f39_8d463051b9564df59522075b4bef319c~mv2.jpg"}, {"name": "Canon CRG-070H T13 Chipsiz İthal Toner (10.6K)", "brand": "Canon", "price": 650.0, "strikePrice": 0.0, "sku": "toner137", "category": "Toner & Kartuş", "ribbon": "", "description": "Canon CRG-070H , T13 CHİPSİZ İTHAL TONER (10.6K) KALİTE ÜRÜNDÜR.", "img": "https://static.wixstatic.com/media/899f39_b3e1e24d61c0431c9e5b52bb2b071f13~mv2.jpg"}, {"name": "Duracell Alkalin AAA İnce Kalem Pil 2x10 Kartela 20'li Paket", "brand": "Duracell", "price": 745.0, "strikePrice": 0.0, "sku": "pil1", "category": "Elektronik", "ribbon": "En Çok Satan", "description": "Duracell Alkalin AAA İnce Kalem Pil 2x10 Kartela 20'li Paket", "img": "https://static.wixstatic.com/media/899f39_de5ec6f053b24cb0bf262daec4856078~mv2.jpg"}, {"name": "Duracell Alkalin AA Kalem Pil 2x10 Kartela 20'li Paket", "brand": "Duracell", "price": 745.0, "strikePrice": 0.0, "sku": "pil2", "category": "Elektronik", "ribbon": "", "description": "Duracell Alkalin AA Kalem Pil 2x10 Kartela 20'li Paket", "img": "https://static.wixstatic.com/media/899f39_9a6a40d2d67840f88fa8043e6025e476~mv2.jpg"}];
+
+let products;
+const savedVersion = localStorage.getItem('ou_version');
+if (savedVersion !== DATA_VERSION) {
+  // Yeni versiyon — localStorage'ı sıfırla
+  products = DEFAULT_PRODUCTS;
+  localStorage.setItem('ou_products', JSON.stringify(products));
+  localStorage.setItem('ou_version', DATA_VERSION);
+} else {
+  // Aynı versiyon — kullanıcının düzenlemelerini koru
+  products = JSON.parse(localStorage.getItem('ou_products') || 'null') || DEFAULT_PRODUCTS;
+}
+
+let currentPage = 1;
+const PER_PAGE = 15;
+let deleteIdx = null;
+let selectedIdxs = new Set();
+
+function save() {
+  localStorage.setItem('ou_products', JSON.stringify(products));
+  updateBadge();
+  updateDashboard();
+}
+
+function updateBadge() {
+  document.getElementById('productCountBadge').textContent = products.length + ' ürün';
+}
+
+// ══ SAYFA GEÇİŞ ══
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const titles = { dashboard: 'Dashboard', products: 'Ürün Listesi', addProduct: 'Yeni Ürün Ekle', export: 'Dışa Aktar' };
+  document.getElementById('topbarTitle').textContent = titles[id] || id;
+  const navMap = { dashboard: 0, products: 1, addProduct: 2, export: 3 };
+  const navItems = document.querySelectorAll('.nav-item');
+  if (navMap[id] !== undefined) navItems[navMap[id]].classList.add('active');
+  if (id === 'products') { renderProducts(); populateCatFilter(); }
+  if (id === 'dashboard') updateDashboard();
+}
+
+// ══ DASHBOARD ══
+function updateDashboard() {
+  document.getElementById('s-total').textContent = products.length;
+  const cats = new Set(products.map(p => p.category).filter(Boolean));
+  document.getElementById('s-cats').textContent = cats.size;
+  const brands = new Set(products.map(p => p.brand).filter(Boolean));
+  document.getElementById('s-brands').textContent = brands.size;
+  document.getElementById('s-sale').textContent = products.filter(p => p.strikePrice > 0).length;
+
+  // Kategori dağılımı
+  const catCount = {};
+  products.forEach(p => { catCount[p.category] = (catCount[p.category] || 0) + 1; });
+  const sorted = Object.entries(catCount).sort((a,b) => b[1]-a[1]);
+  const el = document.getElementById('catBreakdown');
+  el.innerHTML = sorted.map(([cat, cnt]) => `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-bottom:1px solid var(--border)">
+      <span style="font-size:12px;color:var(--text)">${cat || 'Kategorisiz'}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="width:80px;height:4px;border-radius:2px;background:var(--surface2);overflow:hidden">
+          <div style="width:${Math.round(cnt/products.length*100)}%;height:100%;background:var(--green);border-radius:2px"></div>
+        </div>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--green);min-width:24px;text-align:right">${cnt}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ══ KATEGORİ FİLTRE ══
+function populateCatFilter() {
+  const sel = document.getElementById('catFilter');
+  const cats = [...new Set(products.map(p => p.category).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Tüm Kategoriler</option>' + cats.map(c => `<option>${c}</option>`).join('');
+}
+
+// ══ ÜRÜN LİSTESİ ══
+function getFiltered() {
+  const q = document.getElementById('prodSearch').value.toLowerCase();
+  const cat = document.getElementById('catFilter').value;
+  const sort = document.getElementById('sortFilter').value;
+  let list = products.map((p, i) => ({ ...p, _idx: i }));
+  if (q) list = list.filter(p => p.name.toLowerCase().includes(q) || (p.brand||'').toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q));
+  if (cat) list = list.filter(p => p.category === cat);
+  if (sort === 'pa') list.sort((a,b) => a.price - b.price);
+  if (sort === 'pd') list.sort((a,b) => b.price - a.price);
+  if (sort === 'na') list.sort((a,b) => a.name.localeCompare(b.name, 'tr'));
+  return list;
+}
+
+function renderProducts() {
+  const list = getFiltered();
+  const total = list.length;
+  const pages = Math.max(1, Math.ceil(total / PER_PAGE));
+  if (currentPage > pages) currentPage = 1;
+  const slice = list.slice((currentPage-1)*PER_PAGE, currentPage*PER_PAGE);
+
+  const tbody = document.getElementById('prodTbody');
+  if (slice.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg><p>Ürün bulunamadı</p></div></td></tr>`;
+  } else {
+    tbody.innerHTML = slice.map(p => {
+      const catCls = getCatClass(p.category);
+      return `<tr>
+        <td><input type="checkbox" class="chk row-chk" data-idx="${p._idx}" onchange="toggleRow(this)" ${selectedIdxs.has(p._idx)?'checked':''}></td>
+        <td>${p.img ? `<img class="td-img" src="${p.img}" alt="">` : `<div class="td-img-ph"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="width:18px;height:18px"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>`}</td>
+        <td><div class="td-name">${p.name}<small>${p.brand || ''}</small></div></td>
+        <td><span class="cat-badge ${catCls}">${p.category || '—'}</span>${p.ribbon ? `<br><span class="ribbon-badge" style="margin-top:4px">${p.ribbon}</span>` : ''}</td>
+        <td><span class="td-price">${p.price > 0 ? p.price.toLocaleString('tr-TR') + ' ₺' : '—'}</span>${p.strikePrice > 0 ? `<br><span style="font-size:11px;color:var(--muted);text-decoration:line-through;font-family:var(--mono)">${p.strikePrice.toLocaleString('tr-TR')} ₺</span>` : ''}</td>
+        <td><span class="td-sku">${p.sku || '—'}</span></td>
+        <td><div class="row-actions">
+          <div class="act-btn act-edit" onclick="openEdit(${p._idx})" title="Düzenle"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></div>
+          <div class="act-btn act-del" onclick="openDelete(${p._idx})" title="Sil"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></div>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.getElementById('pagInfo').textContent = `${total} üründen ${(currentPage-1)*PER_PAGE+1}–${Math.min(currentPage*PER_PAGE,total)} gösteriliyor`;
+  renderPagination(pages);
+}
+
+function getCatClass(cat) {
+  if (!cat) return '';
+  if (cat.includes('Toner')) return 'cat-toner';
+  if (cat.includes('Yazıcı')) return 'cat-yazici';
+  if (cat.includes('Kırtasiye') || cat.includes('Defter')) return 'cat-kirtasiye';
+  if (cat.includes('Ambalaj')) return 'cat-ambalaj';
+  if (cat.includes('Elektronik')) return 'cat-elektronik';
+  if (cat.includes('Termal')) return 'cat-termal';
+  if (cat.includes('Temizlik')) return 'cat-temizlik';
+  return '';
+}
+
+function renderPagination(pages) {
+  const el = document.getElementById('pagBtns');
+  let html = '';
+  for (let i = 1; i <= pages; i++) {
+    if (pages > 7 && i > 3 && i < pages-1 && Math.abs(i-currentPage) > 1) {
+      if (i === 4) html += `<div class="pag-btn" style="pointer-events:none;opacity:.4">…</div>`;
+      continue;
+    }
+    html += `<div class="pag-btn ${i===currentPage?'active':''}" onclick="goPage(${i})">${i}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+function goPage(n) { currentPage = n; renderProducts(); }
+
+// ══ SEÇİM ══
+function toggleRow(chk) {
+  const idx = parseInt(chk.dataset.idx);
+  if (chk.checked) selectedIdxs.add(idx);
+  else selectedIdxs.delete(idx);
+  updateBulkBar();
+}
+function toggleSelectAll(chk) {
+  const list = getFiltered().slice((currentPage-1)*PER_PAGE, currentPage*PER_PAGE);
+  list.forEach(p => { if (chk.checked) selectedIdxs.add(p._idx); else selectedIdxs.delete(p._idx); });
+  renderProducts();
+  updateBulkBar();
+}
+function updateBulkBar() {
+  const bar = document.getElementById('bulkBar');
+  document.getElementById('bulkCount').textContent = selectedIdxs.size + ' seçili';
+  bar.classList.toggle('show', selectedIdxs.size > 0);
+}
+function clearSelection() { selectedIdxs.clear(); updateBulkBar(); renderProducts(); }
+function bulkDelete() {
+  if (!confirm(`${selectedIdxs.size} ürünü silmek istediğinize emin misiniz?`)) return;
+  const toDelete = [...selectedIdxs].sort((a,b) => b-a);
+  toDelete.forEach(i => products.splice(i, 1));
+  selectedIdxs.clear();
+  save();
+  renderProducts();
+  updateBulkBar();
+  showToast(`${toDelete.length} ürün silindi`, true);
+}
+
+// ══ DÜZENLE ══
+function openEdit(idx) {
+  const p = products[idx];
+  document.getElementById('e-idx').value = idx;
+  document.getElementById('e-name').value = p.name || '';
+  document.getElementById('e-brand').value = p.brand || '';
+  document.getElementById('e-sku').value = p.sku || '';
+  document.getElementById('e-price').value = p.price || '';
+  document.getElementById('e-strikePrice').value = p.strikePrice || '';
+  document.getElementById('e-category').value = p.category || '';
+  document.getElementById('e-ribbon').value = p.ribbon || '';
+  document.getElementById('e-img').value = p.img || '';
+  document.getElementById('e-desc').value = p.description || '';
+  previewEditImg();
+  openModal('editModal');
+}
+function saveEdit() {
+  const idx = parseInt(document.getElementById('e-idx').value);
+  const name = document.getElementById('e-name').value.trim();
+  if (!name) { showToast('Ürün adı zorunludur', false); return; }
+  products[idx] = {
+    name,
+    brand: document.getElementById('e-brand').value.trim(),
+    sku: document.getElementById('e-sku').value.trim(),
+    price: parseFloat(document.getElementById('e-price').value) || 0,
+    strikePrice: parseFloat(document.getElementById('e-strikePrice').value) || 0,
+    category: document.getElementById('e-category').value,
+    ribbon: document.getElementById('e-ribbon').value,
+    img: document.getElementById('e-img').value.trim(),
+    description: document.getElementById('e-desc').value.trim(),
+  };
+  save();
+  closeModal('editModal');
+  renderProducts();
+  showToast('Ürün güncellendi ✓');
+}
+
+// ══ SİL ══
+function openDelete(idx) {
+  deleteIdx = idx;
+  document.getElementById('deleteMsg').textContent = `"${products[idx].name}" ürününü silmek istediğinize emin misiniz?`;
+  openModal('deleteModal');
+}
+function confirmDelete() {
+  if (deleteIdx === null) return;
+  const name = products[deleteIdx].name;
+  products.splice(deleteIdx, 1);
+  save();
+  closeModal('deleteModal');
+  renderProducts();
+  showToast(`"${name.substring(0,30)}..." silindi`, false);
+  deleteIdx = null;
+}
+
+// ══ YENİ ÜRÜN ══
+function openAddModal() { showPage('addProduct'); }
+function saveNewProduct() {
+  const name = document.getElementById('f-name').value.trim();
+  const price = parseFloat(document.getElementById('f-price').value) || 0;
+  const cat = document.getElementById('f-category').value;
+  if (!name) { showToast('Ürün adı zorunludur', false); return; }
+  if (!cat) { showToast('Kategori seçiniz', false); return; }
+  products.push({
+    name,
+    brand: document.getElementById('f-brand').value.trim(),
+    sku: document.getElementById('f-sku').value.trim(),
+    price,
+    strikePrice: parseFloat(document.getElementById('f-strikePrice').value) || 0,
+    category: cat,
+    ribbon: document.getElementById('f-ribbon').value,
+    img: document.getElementById('f-img').value.trim(),
+    description: document.getElementById('f-desc').value.trim(),
+  });
+  save();
+  clearForm();
+  showToast('Ürün eklendi ✓');
+}
+function clearForm() {
+  ['f-name','f-brand','f-sku','f-price','f-strikePrice','f-category','f-ribbon','f-img','f-desc'].forEach(id => {
+    const el = document.getElementById(id);
+    el.value = el.tagName === 'SELECT' ? el.options[0].value : '';
+  });
+  document.getElementById('f-img-preview').classList.remove('show');
+}
+
+// ══ IMG PREVIEW ══
+function previewImg() {
+  const url = document.getElementById('f-img').value;
+  const prev = document.getElementById('f-img-preview');
+  if (url) { prev.src = url; prev.classList.add('show'); } else prev.classList.remove('show');
+}
+function previewEditImg() {
+  const url = document.getElementById('e-img').value;
+  const prev = document.getElementById('e-img-preview');
+  if (url) { prev.src = url; prev.classList.add('show'); } else prev.classList.remove('show');
+}
+
+// ══ EXPORT ══
+function exportAppJS() {
+  const appJS = `// OfiseUygun – app.js (Admin panelinden dışa aktarıldı: ${new Date().toLocaleDateString('tr-TR')})
+const PRODUCTS = ${JSON.stringify(products, null, 2)};
+
+// ══ GERİ KALAN APP KODU ══
+// Bu dosyayı orijinal app.js ile birleştirin.
+// Sadece PRODUCTS dizisini bu dosyadaki ile değiştirin.
+`;
+  download('app.js', appJS);
+  showToast('app.js indirildi ✓');
+}
+function exportJSON() {
+  download('products.json', JSON.stringify(products, null, 2));
+  showToast('products.json indirildi ✓');
+}
+function importJSON(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error();
+      if (!confirm(`${data.length} ürün yüklenecek. Mevcut veriler silinecek. Devam edilsin mi?`)) return;
+      products = data;
+      save();
+      showToast(`${data.length} ürün içe aktarıldı ✓`);
+    } catch { showToast('Geçersiz JSON dosyası', false); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+function download(filename, text) {
+  const a = document.createElement('a');
+  a.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(text);
+  a.download = filename;
+  a.click();
+}
+
+// ══ MODAL ══
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-ov').forEach(ov => {
+  ov.addEventListener('click', e => { if (e.target === ov) ov.classList.remove('open'); });
+});
+
+// ══ TOAST ══
+let toastTimer;
+function showToast(msg, success = true) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  document.getElementById('toastDot').classList.toggle('red', !success);
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ══ BAŞLAT ══
+updateBadge();
+updateDashboard();
+</script>
+</body>
+</html>
