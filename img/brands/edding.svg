@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 110" width="240" height="110">
+  <rect width="240" height="110" rx="10" fill="#fff"/>
+  <!-- Red stripe on left -->
+  <rect x="0" y="0" width="12" height="110" rx="0" fill="#E30613"/>
+  <rect x="0" y="0" width="12" height="110" rx="8" fill="#E30613"/>
+  <!-- edding text -->
+  <text x="130" y="70" font-family="Arial Black, Arial, sans-serif" font-size="44" font-weight="900" fill="#E30613" text-anchor="middle" letter-spacing="-1">edding</text>
+  <!-- Small dot -->
+  <circle cx="225" cy="68" r="5" fill="#E30613"/>
+</svg>
