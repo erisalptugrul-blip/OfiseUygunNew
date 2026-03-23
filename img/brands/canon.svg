@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 110" width="240" height="110">
+  <rect width="240" height="110" rx="10" fill="#fff"/>
+  <!-- Red oval background -->
+  <ellipse cx="120" cy="55" rx="100" ry="38" fill="#CC0000"/>
+  <!-- Canon wordmark -->
+  <text x="120" y="64" font-family="Times New Roman, serif" font-size="38" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="-1">Canon</text>
+</svg>
