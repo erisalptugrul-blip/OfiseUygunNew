@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 110" width="240" height="110">
+  <defs>
+    <linearGradient id="fcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#007a2f"/>
+      <stop offset="100%" style="stop-color:#004d1e"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="240" height="110" rx="10" fill="#fff"/>
+  <!-- Green banner -->
+  <rect y="0" width="240" height="38" rx="0" fill="url(#fcGrad)"/>
+  <rect y="28" width="240" height="10" rx="0" fill="url(#fcGrad)"/>
+  <rect width="240" height="38" rx="10" fill="url(#fcGrad)"/>
+
+  <!-- Castle icon (simplified) -->
+  <g transform="translate(18, 8)" fill="rgba(255,255,255,0.9)">
+    <rect x="0" y="10" width="6" height="12" rx="1"/>
+    <rect x="8" y="10" width="6" height="12" rx="1"/>
+    <rect x="16" y="10" width="6" height="12" rx="1"/>
+    <rect x="2" y="6" width="2" height="5"/>
+    <rect x="10" y="6" width="2" height="5"/>
+    <rect x="18" y="6" width="2" height="5"/>
+    <rect x="0" y="22" width="22" height="6" rx="1"/>
+  </g>
+
+  <!-- FABER-CASTELL text in white on green -->
+  <text x="120" y="26" font-family="Georgia, serif" font-size="13" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing="2">FABER-CASTELL</text>
+
+  <!-- Tagline on white area -->
+  <text x="120" y="62" font-family="Georgia, serif" font-size="10" fill="#006225" text-anchor="middle" letter-spacing="1" font-style="italic">Since 1761</text>
+
+  <!-- Bottom green stripe -->
+  <rect y="80" width="240" height="30" rx="0" fill="#f0f8f2"/>
+  <rect y="95" width="240" height="15" rx="0" fill="#f0f8f2"/>
+  <rect x="0" y="80" width="240" height="30" rx="8" fill="#f0f8f2"/>
+  <text x="120" y="99" font-family="Georgia, serif" font-size="10" fill="#006225" text-anchor="middle" letter-spacing="1">Quality writing instruments</text>
+</svg>
