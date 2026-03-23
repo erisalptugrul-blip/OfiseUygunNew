@@ -539,7 +539,8 @@ footer{background:var(--g900);color:rgba(255,255,255,.6);margin-top:24px}
   .search-wrap{order:3;width:100% !important;flex:none}
   .logo-tagline{display:none}
   .nav-btn{padding:6px 10px;font-size:11px}
-  .cart-btn{padding:6px 12px;font-size:12px}
+  .cart-btn{padding:6px 12px;font-size:12px;gap:6px}
+  .cart-btn svg{width:16px;height:16px}
 
   /* ── INFO BAR: gizle ── */
   .info-bar{display:none}
@@ -608,42 +609,41 @@ footer{background:var(--g900);color:rgba(255,255,255,.6);margin-top:24px}
   .hero-side{grid-template-columns:1fr}
 }
 
-/* ══ KATEGORİ BAR MOBİL SCROLL ══ */
+/* ══ MOBİL HAMBURGER MENÜ STILLERİ ══ */
+/* Base: hamburger gizli, panel gizli */
+.cat-hamburger{display:none;align-items:center;justify-content:center;width:38px;height:38px;background:var(--g700);border-radius:8px;border:none;cursor:pointer;flex-shrink:0;transition:background .2s}
+.cat-hamburger:hover{background:var(--g800)}
+.cat-hamburger svg{width:20px;height:20px;color:#fff}
+
+.cat-mobile-overlay{display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.5);align-items:flex-start;justify-content:flex-end}
+.cat-mobile-overlay.open{display:flex}
+.cat-mobile-panel{background:#fff;width:280px;max-width:88vw;height:100%;overflow-y:auto;box-shadow:-4px 0 24px rgba(0,0,0,.18);animation:slideInRight .2s ease;display:flex;flex-direction:column}
+@keyframes slideInRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.cat-mobile-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;background:var(--g900);flex-shrink:0}
+.cat-mobile-head span{font-size:14px;font-weight:700;color:#fff;letter-spacing:.05em}
+.cat-mobile-close{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;background:rgba(255,255,255,.15);border:none;cursor:pointer;transition:background .2s}
+.cat-mobile-close:hover{background:rgba(255,255,255,.3)}
+.cat-mobile-close svg{width:16px;height:16px;color:#fff}
+.cat-mobile-list{list-style:none;padding:8px 0;flex:1}
+.cat-mobile-list li{border-bottom:1px solid var(--g50)}
+.cat-mobile-list li:first-child{border-top:none}
+.cat-mobile-list button{display:flex;align-items:center;gap:11px;width:100%;padding:13px 18px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);background:none;border:none;cursor:pointer;text-align:left;transition:background .15s,color .15s}
+.cat-mobile-list button:hover{background:var(--g100);color:var(--g700)}
+.cat-mobile-list button svg{width:17px;height:17px;flex-shrink:0;color:var(--g500)}
+
+/* Mobil: hamburger göster, category bar gizle, nav düzenle */
 @media(max-width:768px){
-  .cat-bar{overflow-x:clip;overflow-y:visible}
-  .cat-bar-inner{
-    overflow-x:scroll !important;
-    overflow-y:visible !important;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
-    padding:0 8px;
-    height:44px;
-    /* Sağ soluk efekt — kaydırılabilir olduğunu gösterir */
-    -webkit-mask-image:linear-gradient(to right,#000 85%,transparent 100%);
-    mask-image:linear-gradient(to right,#000 85%,transparent 100%);
-  }
-  .cat-bar-inner::-webkit-scrollbar{display:none}
-  .cbi{padding:0 10px;font-size:11px;gap:4px}
-  .cbi svg{width:13px;height:13px}
-  /* Dropdown ok ikonlarını gizle, yer kazandır */
-  .cbi > svg:last-child{display:none}
+  .cat-bar{display:none}
+  .cat-hamburger{display:flex}
+  .nav-inner{flex-wrap:wrap;height:auto;padding:10px 14px 6px;gap:8px}
+  .logo{order:1;flex-shrink:0}
+  .logo-text{font-size:32px}
+  .logo-tagline{display:none}
+  .nav-actions{order:2;margin-left:auto;display:flex;align-items:center;gap:6px}
+  .search-wrap{order:3;width:100%;flex:none;height:40px;margin-top:6px;margin-bottom:6px}
+  .nav-btn{display:none}
+  .cart-btn{padding:7px 12px;font-size:12px;gap:6px}
+  .cart-btn svg{width:16px;height:16px}
+  .page{padding:50px 0 56px}
 }
 
-/* ══ POLİTİKA SAYFALARI ══ */
-.policy-page{padding:40px 0 80px;min-height:60vh}
-.policy-inner{max-width:800px;margin:0 auto}
-.policy-back{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border:1.5px solid var(--border);border-radius:8px;background:#fff;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;margin-bottom:28px;transition:all .18s}
-.policy-back:hover{border-color:var(--g600);color:var(--g700);background:var(--g100)}
-.policy-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:900;color:var(--text);margin-bottom:6px;line-height:1.15}
-.policy-date{font-size:12px;color:var(--muted);margin-bottom:32px}
-.policy-body h2{font-size:15px;font-weight:700;color:var(--g800);margin:28px 0 8px;padding-left:12px;border-left:3px solid var(--g500)}
-.policy-body h2:first-child{margin-top:0}
-.policy-body p{font-size:13px;color:var(--text);line-height:1.8;margin-bottom:14px}
-.policy-body ul{margin:0 0 14px 20px;padding:0}
-.policy-body ul li{font-size:13px;color:var(--text);line-height:1.8;list-style:disc;margin-bottom:4px}
-.policy-body strong{color:var(--g800)}
-
-@media(max-width:640px){
-  .policy-title{font-size:24px}
-  .policy-body h2{font-size:14px}
-}
