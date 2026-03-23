@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 96" width="240" height="96">
+  <!-- White background -->
+  <rect width="240" height="96" rx="8" fill="#fff"/>
+  <!-- Kyocera geometric mark (from Simple Icons) scaled up -->
+  <g transform="translate(20, 16) scale(2.6)">
+    <path fill="#DF0522" d="M9.677 4.645L2.323 12V4.645h7.354zm-7.354 14.71h7.355L2.323 12v7.355zm7.354 0L17.032 12 9.677 4.645v14.71zM21.677 0h-7.355L9.677 4.645h7.355V12l4.645-4.645V0zm-12 19.355L14.323 24h7.355v-7.355L17.032 12v7.355H9.677z"/>
+  </g>
+  <!-- KYOCERA wordmark -->
+  <text x="145" y="58" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#DF0522" text-anchor="middle" letter-spacing="1">KYOCERA</text>
+</svg>
