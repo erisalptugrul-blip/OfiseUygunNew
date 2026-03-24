@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 210 80">
+  <polygon points="18,14 62,14 72,40 62,66 18,66 8,40" fill="none" stroke="#2d3561" stroke-width="2"/>
+  <text x="40" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="19" font-weight="700" fill="#2d3561">PE</text>
+  <polygon points="78,14 122,14 132,40 122,66 78,66 68,40" fill="none" stroke="#2d3561" stroke-width="2"/>
+  <text x="100" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="19" font-weight="700" fill="#2d3561">RE</text>
+  <polygon points="138,14 182,14 192,40 182,66 138,66 128,40" fill="none" stroke="#2d3561" stroke-width="2"/>
+  <text x="160" y="46" text-anchor="middle" font-family="Georgia,serif" font-size="19" font-weight="700" fill="#2d3561">JA</text>
+</svg>

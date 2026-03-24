@@ -747,10 +747,10 @@
   </div>
 
   <section id="image-galery">
-    <div class="image-text" style="display: flex; justify-content: center; align-items: center; flex-direction: column; ">
+    <div class="image-text" style="display: flex; justify-content: center; align-items: center; flex-direction: column;  ">
     <img src="img/pereja-banner.svg" alt="" width="1300px" height="auto">
     </div>
-    <div class="image-galery">
+    <div class="image-galery" style="gap: 10px;">
       <div class="image-galery__item" onclick="showAllCat('Temizlik & Hijyen',null)" role="button" tabindex="0" style="cursor:pointer">
           <img src="img/pere.svg" alt="OfiseUygun mağaza içi görüntü 1" width="80px" height="80px">
       </div>
@@ -1092,11 +1092,15 @@
           <button>Abone Ol</button>
         </div>
       </div>
+      <div class="social" style="display:flex;align-items:center;gap:12px; ">
+        <a href="https://www.instagram.com/alperis22" aria-label="Linkedin"><img src="img/insta-Photoroom.png" alt="İnstagram" loading="lazy" width="30px" height="30px" style="background: transparent;"></a>
+        <a href="https://www.linkedin.com/in/alptu%C4%9Frul-eri%C5%9F-9439253a0/" aria-label="Linkedin"><img src="img/linkedin.png" alt="Linkedin" loading="lazy" width="55px" height="55px" style="background: transparent;"></a>
+      </div>
     </div>
   </div>
   <div class="footer-main">
     <div>
-      <div class="f-brand-name">Ofise<em>Uygun</em></div>
+      <div class="f-brand-name">OfiseUygun</div>
       <p class="f-desc">Ofis kırtasiyesi, toner, kartuş ve ofis ekipmanlarında güvenilir adresiniz. Hızlı teslimat, uygun fiyat.</p>
       <div class="f-pay">
         <div class="pay-chip">VISA</div>
@@ -1106,14 +1110,14 @@
         <div class="pay-chip">Kapıda Ödeme</div>
       </div>
     </div>
-    <nav class="f-col" aria-label="Kurumsal linkler">
-      <h3>Kurumsal</h3>
+    <nav class="f-col" aria-label="Kurumsal linkler" style="margin-left: 40px;">
+      <h3 style="margin-bottom: 10px;">Kurumsal</h3>
       <a href="#about-seo-section">Hakkımızda</a>
       <a href="#">Kariyer</a>
       <a href="#" onclick="showPage('contactPage')">İletişim</a>
     </nav>
-    <nav class="f-col" aria-label="Müşteri hizmetleri">
-      <h3>Müşteri Hizmetleri</h3>
+    <nav class="f-col" aria-label="Müşteri hizmetleri" style="margin-left: 20px;">
+      <h3 style="margin-bottom: 10px;">Müşteri Hizmetleri</h3>
       <a href="#about-seo-section">SSS</a>
       <a href="#">Sipariş Takibi</a>
       <a href="#" onclick="event.preventDefault();showPage('iadePage')">İade Politikası</a>
@@ -1123,8 +1127,8 @@
       <a href="#" onclick="event.preventDefault();showPage('sartKosullarPage')">Şart ve Koşullar</a>
       <a href="#" onclick="event.preventDefault();showPage('mesafeliSatisPage')">Mesafeli Satış Sözleşmesi</a>
     </nav>
-    <nav class="f-col" aria-label="Kategoriler">
-      <h3>Kategoriler</h3>
+    <nav class="f-col" aria-label="Kategoriler" style="margin-left: 40px;">
+      <h3 style="margin-bottom: 10px;">Kategoriler</h3>
       <a href="#" onclick="showAllCat('Toner & Kartuş',null)">Toner &amp; Kartuş</a>
       <a href="#" onclick="showAllCat('Ofis ve Kırtasiye',null)">Ofis ve Kırtasiye</a>
       <a href="#" onclick="showAllCat('Yazıcı & Fotokopi',null)">Yazıcı &amp; Fotokopi</a>
@@ -1132,8 +1136,8 @@
       <a href="#" onclick="showAllCat('Termal & POS Rulo',null)">Termal &amp; POS Rulo</a>
       <a href="#" onclick="showAllCat('Temizlik & Hijyen',null)">Temizlik &amp; Hijyen</a>
     </nav>
-    <nav class="f-col" aria-label="Markalar">
-      <h3>Markalar</h3>
+    <nav class="f-col" aria-label="Markalar" style="margin-left: 50px;">
+      <h3 style="margin-bottom: 10px;">Markalar</h3>
       <a href="#" onclick="showAllCat('Toner & Kartuş',null);doSearch('Canon')">Canon</a>
       <a href="#" onclick="showAllCat('Toner & Kartuş',null);doSearch('Kyocera')">Kyocera</a>
       <a href="#" onclick="showAllCat('Toner & Kartuş',null);doSearch('HP')">HP</a>
@@ -1149,13 +1153,13 @@
         <div class="fmap-name">📍 OfiseUygun</div>
         <div class="fmap-addr">Cumhuriyet Mah. Halide Edip Adıvar Sok. No:8 Dükkan:31 Edirne/Merkez</div>
         <div class="fmap-phone"><a href="tel:+905398136317">📞 05398136317</a></div>
-        <div class="fmap-hours"><time>Pzt–Cmt: 09:00 – 19:00</time></div>
+        <div class="fmap-hours"><time>Pzt–Cmt: 08:30 – 19:00</time></div>
         <a href="#" onclick="showPage('contactPage')" class="fmap-cta">İletişim Sayfasına Git →</a>
       </address>
       <iframe
         title="OfiseUygun Konum Haritası"
         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2980.0983376785007!2d26.5923901!3d41.6752196!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14b32fe55fc33cb1%3A0xd7c57110c255c296!2sSatt%20B%C3%BCro%20Makinaları%20ve%20Kırtasiye%20Malzemeleri!5e0!3m2!1str!2str!4v1774121212599!5m2!1str!2str"
-        width="900" height="180" style="border:0;border-radius:10px;flex-shrink:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+        width="1000" height="180" style="border:0;border-radius:10px;flex-shrink:0" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
       </iframe>
     </div>
   </div>

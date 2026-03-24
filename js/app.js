@@ -11,17 +11,18 @@ const PRODUCTS = [{"name": "Kyocera TK-3060 İTHAL TONER", "brand": "", "price":
 const BRANDS = ["Acer","Addison","Almera","Bencup","Bic","Bion","Brons","Brother","Canon","Casio","Dark","Delta","Dilman","Duracell","Edding","Epson","Esselte","Ethex","Everest","Faber-Castell","Flood","HP","Havit","KLAS","KRAF","Kyocera","Lenova","Liz","Mas","Noki","Oyal","Pensan","Pereja","Philips","Picador","Pritt","Rapid","Rotring","S-Link","Samsung","Serve","Silka","SvetoCopy","TEKNO","Tanex","Tipex","Trust","Umix","UniNote","Utax","Vege"];
 
 const BRAND_LOGOS = [
-  { name:'Faber-Castell', img:'img/brands/faber-castell.svg' },
+  { name:'Faber-Castell', img:'img/faber castel.png'         },
   { name:'Canon',         img:'img/brands/canon.svg'         },
-  { name:'Epson',         img:'img/brands/epson.svg'         },
-  { name:'Bic',           img:'img/brands/bic.svg'           },
+  { name:'Epson',         img:'img/brands/epson.svg',  scale:1.3 },
+  { name:'Bic',           img:'img/bic.png'                  },
   { name:'Kyocera',       img:'img/brands/kyocera.svg'       },
-  { name:'KRAF',          img:'img/brands/kraf.svg'          },
-  { name:'Mas',           img:'img/brands/mas.svg'           },
-  { name:'HP',            img:'img/brands/hp.svg'            },
-  { name:'Esselte',       img:'img/brands/esselte.svg'       },
+  { name:'KRAF',          img:'img/kraf.jpg',          scale:1.3 },
+  { name:'Mas',           img:'img/mas.png',           scale:1.3 },
+  { name:'HP',            img:'img/brands/hp.svg',     scale:1.3 },
+  { name:'Esselte',       img:'img/esselte.png'              },
   { name:'Edding',        img:'img/brands/edding.svg'        },
-  { name:'Duracell',      img:'img/brands/duracell.svg'      },
+  { name:'Duracell',      img:'img/duracel.jpg'              },
+  { name:'Pereja',        img:'img/pereja_logo.jpg',   scale:1.3 },
 ];
 
 /* ── STATE ── */
@@ -70,7 +71,7 @@ function pCard(p, idx) {
 
 /* ── RENDER HOME ── */
 function renderHome() {
-  document.getElementById('brandsRow').innerHTML = BRAND_LOGOS.map(b=>`<button class="brand-logo-card" onclick="fCat='';fBrand='${b.name}';showAll(null)" aria-label="${b.name}"><img src="${b.img}" alt="${b.name}" class="brand-logo-img" loading="lazy"></button>`).join('');
+  document.getElementById('brandsRow').innerHTML = BRAND_LOGOS.map(b=>`<button class="brand-logo-card" onclick="fCat='';fBrand='${b.name}';showAll(null)" aria-label="${b.name}"><img src="${b.img}" alt="${b.name}" class="brand-logo-img" loading="lazy"${b.scale?` style="transform:scale(${b.scale})"`:''}></button>`).join('');
   const bests = PRODUCTS.filter(p=>p.ribbon==='En Çok Satan').slice(0,12);
   document.getElementById('bestRow').innerHTML = bests.map(p=>pCard(p,PRODUCTS.indexOf(p))).join('');
   [['tonerRow','Toner & Kartuş'],['printerRow','Yazıcı & Fotokopi'],['kalemRow','Ofis ve Kırtasiye'],['dosyaRow','Ambalaj Malzemeleri'],['elektronikRow','Elektronik']].forEach(([id,cat])=>{
