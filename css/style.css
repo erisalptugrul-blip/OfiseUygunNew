@@ -720,3 +720,5 @@ footer{background:var(--g900);color:rgba(255,255,255,.6);margin-top:24px}
     margin-bottom: 6px !important;
   }
 }
+
+.image-galery__item:hover img{transform:scale(1.05)}
