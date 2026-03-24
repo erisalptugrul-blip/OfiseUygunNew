@@ -78,9 +78,9 @@ img{display:block;max-width:100%;object-fit:contain}
 .cart-badge{position:absolute;top:-7px;right:-7px;background:var(--red);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;padding:0 3px}
 
 /* ── CATEGORY BAR ── */
-.cat-bar{background:#fff; margin-top:1px; border-bottom:1px solid var(--border);position:relative;z-index:380;overflow:visible}
+.cat-bar{background:#fff; margin-top:-2px; border-bottom:1px solid var(--border);position:relative;z-index:380;overflow:visible}
 .cat-bar-inner{max-width:1280px;margin:0 auto;padding:0 20px;height:var(--cat-h);display:flex;align-items:stretch;overflow:visible;scrollbar-width:none;position:relative}
-.cat-bar-inner::-webkit-scrollbar{display:none}.cbi{display:flex;align-items:center;gap:2px;padding:0 14px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;  color .15s,border-color .15s;flex-shrink:0;position:relative;overflow:visible}
+.cat-bar-inner::-webkit-scrollbar{display:none}.cbi{display:flex;align-items:center;gap:2px;padding:0 14px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent; margin-bottom: -1px;  color .15s,border-color .15s;flex-shrink:0;position:relative;overflow:visible}
 .cbi:hover,.cbi.active{color:var(--g700);border-color:var(--g600)}
 .cbi svg{width:14px;height:14px;flex-shrink:0}
 
@@ -664,7 +664,7 @@ footer{background:var(--g900);color:rgba(255,255,255,.6);margin-top:24px}
   height: 600px;
   margin: 15px auto 50px;
   width: 100%;
-  
+  overflow: hidden;
 }
 
 .image-galery img {
@@ -737,5 +737,11 @@ footer{background:var(--g900);color:rgba(255,255,255,.6);margin-top:24px}
   .footer-map-inner,
   .brand-strip .container{max-width:1500px}
   .footer-main{max-width:1500px}
+  .image-galery{max-width:1500px}
+  #image-galery .image-text img{width:100%;max-width:1500px}
+
+  .cat-bar-inner{justify-content: center; margin-top: -3px;
+  
+  }
 }
 
